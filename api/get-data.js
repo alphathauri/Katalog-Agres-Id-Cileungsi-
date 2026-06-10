@@ -1,29 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-
 export default async function handler(req, res) {
+  const { type } = req.query;
+  const binId = type === 'config'
+    ? process.env.JSONBIN_CONFIG_BIN
+    : process.env.JSONBIN_PRODUCTS_BIN;
 
-  const { data: products } =
-    await supabase
-      .from('products')
-      .select('*')
-      .order('id');
+  if (!binId) return res.status(400).json({ error: 'Unknown type' });
 
-  const { data: settings } =
-    await supabase
-      .from('settings')
-      .select('*')
-      .eq('id', 1)
-      .single();
-
-  res.status(200).json({
-    config: {
-      wa: settings?.wa || ''
-    },
-    products: products || []
+  const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+    headers: { 'X-Master-Key': process.env.JSONBIN_API_KEY }
   });
+
+  const data = await response.json();
+  res.status(200).json(data.record);
 }
