@@ -402,6 +402,9 @@ footer strong{color:var(--text2);}
 </div>
 
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+});
 // ======== STATE ========
 let isLoggedIn = false;
 let activeFilter = 'semua';
@@ -409,9 +412,15 @@ let searchQuery = '';
 let currentImageBase64 = null;
 let excelRows = []; // parsed excel preview data
 
-let config;
+let config = {
+  wa: "6281322569903"
+};
+
 let products = [];
-let creds;
+let creds = {
+  user: "admin",
+  pass: "admin123"
+};
 
 function formatRp(num){
   return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(num||0);
@@ -533,9 +542,21 @@ function doLogin(){
 }
 function doLogout(){ isLoggedIn=false; closeAdmin(); }
 function showAdminPanel(){
-  document.getElementById('waNumber').value=config.wa;
+
+  if(!config){
+    config = {
+      wa: "6281322569903"
+    };
+  }
+
+  document.getElementById('waNumber').value =
+    config.wa || '';
+
   renderAdminList();
-  document.getElementById('adminModal').classList.add('open');
+
+  document
+    .getElementById('adminModal')
+    .classList.add('open');
 }
 function openChangePw(){
   ['newUser','oldPass','newPass','newPass2'].forEach(id=>document.getElementById(id).value='');
