@@ -424,7 +424,7 @@ function stokInfo(stok){
 function getCreds(){
   return creds || JSON.parse(localStorage.getItem('ts_creds')) || {user:'admin',pass:'admin123'};
 }
-let nextId = Math.max(...products.map(p=>p.id), 0) + 1;
+let nextId = 1;
 
 async function saveProducts() { 
   await fetch('/api/save-data', { 
@@ -883,7 +883,27 @@ function showToast(msg){
   t._timer=setTimeout(()=>{ t.style.opacity='0'; },2800);
 }
 
-window.addEventListener("DOMContentLoaded", ()=>{ if(typeof loadData==="function"){ loadData(); } else { render(); }});
+
+async function loadData() {
+  try {
+    const configRes = await fetch('/api/get-data?type=config');
+    const productRes = await fetch('/api/get-data?type=products');
+
+    config = configRes.ok ? await configRes.json() : { wa:'6281234567890' };
+    products = productRes.ok ? await productRes.json() : [];
+
+    if (!Array.isArray(products)) products = [];
+    nextId = Math.max(0, ...products.map(p => Number(p.id)||0)) + 1;
+    render();
+  } catch(err){
+    console.error('Load data error:', err);
+    config = { wa:'6281234567890' };
+    products = [];
+    render();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", ()=>{ loadData(); });
 </script>
 </body>
 </html>
