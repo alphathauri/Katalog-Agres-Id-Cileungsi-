@@ -402,10 +402,7 @@ footer strong{color:var(--text2);}
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-  loadData();
-});
-// ======== STATE ========
+  document.addEventListener('DOMContentLoaded', loadData);// ======== STATE ========
 let isLoggedIn = false;
 let activeFilter = 'semua';
 let searchQuery = '';
@@ -421,6 +418,7 @@ let creds = {
   user: "admin",
   pass: "admin123"
 };
+let isLoaded = false;
 
 function formatRp(num){
   return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(num||0);
@@ -587,10 +585,16 @@ function doChangePassword(){
 // ======== ADMIN PANEL ========
 function closeAdmin(){ document.getElementById('adminModal').classList.remove('open'); resetForm(); cancelExcelPreview(); }
 document.getElementById('adminModal').addEventListener('click',function(e){ if(e.target===this)closeAdmin(); });
-function saveWA(){
+async function saveWA(){
   const val=document.getElementById('waNumber').value.trim().replace(/\D/g,'');
   if(!val){alert('Masukkan nomor WA yang valid!');return;}
-  config.wa=val; saveConfig(); alert('✅ Nomor WhatsApp berhasil disimpan!'); render();
+
+  config.wa = val;
+
+  await saveConfig();   // tunggu benar-benar tersimpan
+  render();             // refresh UI WA link
+
+  showToast('✅ Nomor WhatsApp berhasil disimpan!');
 }
 function switchAdminTab(tab,el){
   document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
@@ -906,25 +910,32 @@ function showToast(msg){
 
 
 async function loadData() {
+  if (isLoaded) return;
+  isLoaded = true;
+
   try {
-    const configRes = await fetch('/api/get-data?type=config');
-    const productRes = await fetch('/api/get-data?type=products');
+    const [configRes, productRes] = await Promise.all([
+      fetch('/api/get-data?type=config'),
+      fetch('/api/get-data?type=products')
+    ]);
 
-    config = configRes.ok ? await configRes.json() : { wa:'6281234567890' };
-    products = productRes.ok ? await productRes.json() : [];
+    const configData = configRes.ok ? await configRes.json() : null;
+    const productData = productRes.ok ? await productRes.json() : [];
 
-    if (!Array.isArray(products)) products = [];
+    config = configData || { wa: "6281234567890" };
+    products = Array.isArray(productData) ? productData : [];
+
     nextId = Math.max(0, ...products.map(p => Number(p.id)||0)) + 1;
+
     render();
-  } catch(err){
+
+  } catch (err) {
     console.error('Load data error:', err);
-    config = { wa:'6281234567890' };
-    products = [];
-    render();
+    // JANGAN overwrite config di sini
+    showToast("❌ Gagal load data server");
   }
 }
 
-window.addEventListener("DOMContentLoaded", ()=>{ loadData(); });
 </script>
 </body>
 </html>
