@@ -404,6 +404,14 @@ footer strong{color:var(--text2);}
 <script>
   document.addEventListener('DOMContentLoaded', () => {
   loadData();
+  const credsRes = await fetch('/api/get-data?type=creds');
+
+creds = credsRes.ok
+  ? await credsRes.json()
+  : {
+      user: 'admin',
+      pass: 'admin123'
+    };
 });
 // ======== STATE ========
 let isLoggedIn = false;
@@ -431,7 +439,7 @@ function stokInfo(stok){
   return {cls:'ada',label:'Tersedia'};
 }
 function getCreds(){
-  return creds || JSON.parse(localStorage.getItem('ts_creds')) || {user:'admin',pass:'admin123'};
+  return creds;
 }
 let nextId = 1;
 
@@ -462,7 +470,28 @@ async function saveConfig() {
     console.error('Failed to save config:', error);
   }
 }
+async function saveCreds() {
+  try {
+    const response = await fetch('/api/save-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        type: 'creds',
+        data: creds
+      })
+    });
 
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to save creds:', error);
+  }
+}
 // ======== RENDER ========
 function render(){
   const filtered = products.filter(p=>{
@@ -579,7 +608,23 @@ function doChangePassword(){
   if(oldPass!==c.pass){err.textContent='❌ Password lama salah!';err.style.display='block';return;}
   if(newPass.length<6){err.textContent='Password baru minimal 6 karakter!';err.style.display='block';return;}
   if(newPass!==newPass2){err.textContent='❌ Konfirmasi tidak cocok!';err.style.display='block';return;}
-  localStorage.setItem('ts_creds',JSON.stringify({user:newUser,pass:newPass}));
+  creds = {
+  user: newUser,
+  pass: newPass
+};
+
+saveCreds();
+
+fetch('/api/save-data', {
+  method:'POST',
+  headers:{
+    'Content-Type':'application/json'
+  },
+  body:JSON.stringify({
+    type:'creds',
+    data:creds
+  })
+});
   ok.textContent='✅ Password berhasil diubah!'; ok.style.display='block';
   setTimeout(()=>document.getElementById('changePwModal').classList.remove('open'),1500);
 }
