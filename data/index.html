@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agres ID Cileungsi — Toko Laptop, HP & Aksesoris</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg:#0a0a0f; --bg2:#12121a; --bg3:#1a1a26; --card:#16161f;
+  --border:#2a2a3a; --accent:#6c63ff; --accent2:#a78bfa;
+  --green:#22c55e; --red:#ef4444; --yellow:#f59e0b;
+  --text:#f0f0f8; --text2:#a0a0b8; --text3:#606078; --wa:#25d366;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+header{background:rgba(10,10,15,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;padding:0 24px;}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px;}
+.logo{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;}
+.header-actions{display:flex;align-items:center;gap:10px;}
+.btn-admin{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn-admin:hover{border-color:var(--accent);color:var(--accent);}
+.search-wrap{position:relative;}
+.search-wrap input{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 16px 8px 38px;border-radius:8px;font-size:14px;width:220px;outline:none;transition:border-color .2s;}
+.search-wrap input:focus{border-color:var(--accent);}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;font-size:15px;}
+.hero{background:linear-gradient(135deg,#0a0a0f 0%,#12101f 50%,#0a0f1a 100%);padding:60px 24px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-50%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(108,99,255,0.12) 0%,transparent 70%);pointer-events:none;}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,5vw,52px);font-weight:700;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,#fff 30%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{color:var(--text2);font-size:16px;max-width:480px;margin:0 auto 32px;}
+.hero-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;}
+.stat{text-align:center;}
+.stat-num{font-size:24px;font-weight:700;color:var(--accent2);}
+.stat-label{font-size:12px;color:var(--text3);margin-top:2px;}
+.filter-bar{max-width:1200px;margin:32px auto 0;padding:0 24px;display:flex;gap:8px;flex-wrap:wrap;}
+.tab{padding:8px 20px;border-radius:100px;background:var(--bg2);border:1px solid var(--border);color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;}
+.tab:hover{border-color:var(--accent);color:var(--accent);}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.main{max-width:1200px;margin:0 auto;padding:24px;}
+.section-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;margin-bottom:20px;color:var(--text2);display:flex;align-items:center;gap:10px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s;}
+.card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 12px 40px rgba(108,99,255,0.15);}
+.card-img{width:100%;aspect-ratio:4/3;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:52px;position:relative;overflow:hidden;}
+.card-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.badge-cat{position:absolute;top:10px;left:10px;background:rgba(108,99,255,0.2);border:1px solid rgba(108,99,255,0.4);color:var(--accent2);font-size:11px;font-weight:600;padding:3px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px;}
+.badge-stok{position:absolute;top:10px;right:10px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:100px;}
+.badge-stok.ada{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3);color:var(--green);}
+.badge-stok.habis{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:var(--red);}
+.badge-stok.sedikit{background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);color:var(--yellow);}
+.card-body{padding:16px;}
+.card-brand{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.card-name{font-weight:600;font-size:15px;margin-bottom:6px;line-height:1.3;}
+.card-spec{font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5;}
+.card-price{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--accent2);margin-bottom:14px;}
+.card-price small{font-size:12px;color:var(--text3);font-weight:400;}
+.btn-wa{width:100%;background:var(--wa);color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,transform .1s;text-decoration:none;}
+.btn-wa:hover{background:#1db954;}
+.btn-wa:active{transform:scale(.98);}
+.btn-wa.disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;border:1px solid var(--border);pointer-events:none;}
+.empty{text-align:center;padding:80px 24px;color:var(--text3);}
+.empty-icon{font-size:48px;margin-bottom:12px;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:16px;width:90%;max-width:560px;max-height:90vh;overflow-y:auto;padding:28px;animation:modalIn .2s ease;}
+@keyframes modalIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.modal-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;}
+.modal-close{background:var(--bg3);border:1px solid var(--border);color:var(--text2);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;transition:background .2s;}
+.modal-close:hover{background:var(--border);}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px;display:block;}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:14px;outline:none;transition:border-color .2s;font-family:'Inter',sans-serif;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);}
+.form-select option{background:var(--bg2);}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.img-upload-area{width:100%;aspect-ratio:16/9;background:var(--bg3);border:2px dashed var(--border);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden;}
+.img-upload-area:hover{border-color:var(--accent);background:rgba(108,99,255,0.05);}
+.img-upload-area.has-image{border-style:solid;}
+.img-upload-area img{width:100%;height:100%;object-fit:cover;display:block;}
+.img-upload-label{font-size:13px;color:var(--text3);margin-top:8px;}
+.img-upload-icon{font-size:32px;}
+.img-upload-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.6);display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.img-upload-area:hover .img-upload-overlay{display:flex;}
+.img-upload-overlay span{font-size:13px;color:#fff;font-weight:500;}
+.img-actions{display:flex;gap:8px;margin-top:8px;}
+.btn-img-remove{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.3);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn-img-remove:hover{background:rgba(239,68,68,0.22);}
+.btn-primary{background:var(--accent);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:background .2s;width:100%;}
+.btn-primary:hover{background:#5b52e0;}
+.btn-danger{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.3);padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn-danger:hover{background:rgba(239,68,68,0.2);}
+.btn-edit{background:rgba(108,99,255,0.1);color:var(--accent);border:1px solid rgba(108,99,255,0.3);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;}
+.btn-edit:hover{background:rgba(108,99,255,0.2);}
+.admin-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.admin-tab{padding:8px 16px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
+.admin-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.product-list-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.item-thumb{width:52px;height:52px;border-radius:8px;background:var(--bg2);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.item-thumb img{width:100%;height:100%;object-fit:cover;}
+.item-info{flex:1;min-width:0;}
+.item-name{font-weight:600;font-size:14px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-meta{font-size:12px;color:var(--text3);}
+.item-actions{display:flex;gap:6px;flex-shrink:0;}
+.wa-config{background:rgba(37,211,102,0.08);border:1px solid rgba(37,211,102,0.25);border-radius:10px;padding:16px;margin-bottom:20px;}
+.wa-config-title{font-size:14px;font-weight:600;color:var(--green);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.alert-err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--red);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
+.alert-ok{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
+
+/* ===== EXCEL SECTION ===== */
+.excel-box{border-radius:12px;padding:18px;margin-bottom:18px;}
+.excel-box.green{background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);}
+.excel-box.purple{background:rgba(108,99,255,0.05);border:1px solid rgba(108,99,255,0.2);}
+.excel-box-title{font-size:14px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:7px;}
+.excel-box-title.green{color:var(--green);}
+.excel-box-title.purple{color:var(--accent2);}
+.excel-box-desc{font-size:12px;color:var(--text3);margin-bottom:14px;line-height:1.6;}
+.drop-zone{border:2px dashed rgba(108,99,255,0.35);border-radius:10px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(108,99,255,0.03);position:relative;}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent2);background:rgba(108,99,255,0.08);}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop-zone-icon{font-size:36px;margin-bottom:8px;}
+.drop-zone-text{font-size:14px;color:var(--text2);font-weight:500;margin-bottom:4px;}
+.drop-zone-sub{font-size:12px;color:var(--text3);}
+.template-note{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:13px 15px;margin-top:13px;font-size:12px;color:var(--text3);line-height:1.75;}
+.template-note strong{color:var(--text2);}
+.template-note code{background:rgba(108,99,255,0.15);color:var(--accent2);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:11px;}
+.btn-green{background:rgba(34,197,94,0.12);color:var(--green);border:1px solid rgba(34,197,94,0.3);padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-green:hover{background:rgba(34,197,94,0.22);}
+.btn-apply{background:var(--green);color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:background .2s;display:inline-flex;align-items:center;gap:7px;}
+.btn-apply:hover{background:#16a34a;}
+.btn-apply:disabled{opacity:0.45;cursor:not-allowed;}
+.btn-cancel2{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:10px 16px;border-radius:8px;font-size:14px;cursor:pointer;transition:all .2s;}
+.btn-cancel2:hover{border-color:var(--red);color:var(--red);}
+.preview-summary{display:flex;gap:14px;flex-wrap:wrap;padding:11px 15px;background:var(--bg3);border-radius:8px;font-size:13px;margin-bottom:12px;}
+.preview-summary span{display:flex;align-items:center;gap:5px;}
+.preview-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+.preview-table{width:100%;border-collapse:collapse;font-size:13px;}
+.preview-table th{background:var(--bg3);color:var(--text2);font-weight:600;padding:10px 13px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+.preview-table td{padding:8px 13px;border-bottom:1px solid rgba(42,42,58,0.5);color:var(--text);}
+.preview-table tr:last-child td{border-bottom:none;}
+.preview-table tr.row-ok td{background:rgba(34,197,94,0.04);}
+.preview-table tr.row-err td{background:rgba(239,68,68,0.05);}
+.preview-table tr.row-same td{opacity:0.5;}
+.badge-change{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;}
+.badge-change.ok{background:rgba(34,197,94,0.15);color:var(--green);}
+.badge-change.err{background:rgba(239,68,68,0.15);color:var(--red);}
+.badge-change.same{background:rgba(96,96,120,0.18);color:var(--text3);}
+.val-change{display:inline-flex;align-items:center;gap:4px;}
+.val-old{color:var(--text3);}
+.val-arrow{color:var(--accent2);}
+.val-new-up{color:var(--green);font-weight:700;}
+.val-new-dn{color:var(--red);font-weight:700;}
+.preview-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+
+footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center;color:var(--text3);font-size:13px;margin-top:60px;}
+footer strong{color:var(--text2);}
+@media(max-width:600px){
+  .header-inner{gap:8px;}
+  .search-wrap input{width:140px;}
+  .form-row{grid-template-columns:1fr;}
+  .hero h1{font-size:28px;}
+  .hero-stats{gap:24px;}
+  .item-actions{flex-direction:column;}
+  .preview-actions{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#"><span class="logo-dot"></span> AGRES ID CILEUNGSI</a>
+    <div class="header-actions">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Cari produk...">
+      </div>
+      <button class="btn-admin" onclick="openAdmin()">⚙️ Admin</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Gadget Terbaik<br>Harga Terbaik</h1>
+  <p>Laptop, handphone, dan aksesoris pilihan. Garansi resmi, pengiriman cepat ke seluruh Indonesia.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num" id="statProduk">0</div><div class="stat-label">Produk Tersedia</div></div>
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">Kategori</div></div>
+    <div class="stat"><div class="stat-num">⚡</div><div class="stat-label">Fast Response WA</div></div>
+  </div>
+</section>
+
+<div class="filter-bar">
+  <button class="tab active" onclick="filterKategori('semua',this)">Semua</button>
+  <button class="tab" onclick="filterKategori('laptop',this)">💻 Laptop</button>
+  <button class="tab" onclick="filterKategori('handphone',this)">📱 Handphone</button>
+  <button class="tab" onclick="filterKategori('aksesoris',this)">🎧 Aksesoris</button>
+</div>
+
+<div class="main">
+  <div class="section-title" id="sectionTitle">Semua Produk</div>
+  <div class="grid" id="productGrid"></div>
+  <div class="empty" id="emptyState" style="display:none">
+    <div class="empty-icon">🔍</div>
+    <p>Tidak ada produk ditemukan.</p>
+  </div>
+</div>
+
+<footer>
+  <p>© 2025 <strong>Agres ID Cileungsi</strong> — Toko Gadget Terpercaya</p>
+  <p style="margin-top:6px;">Hubungi kami via WhatsApp untuk info lebih lanjut &amp; negosiasi harga.</p>
+</footer>
+
+<!-- LOGIN -->
+<div class="modal-overlay" id="loginModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head">
+      <div class="modal-title">🔐 Login Admin</div>
+      <button class="modal-close" onclick="closeLogin()">✕</button>
+    </div>
+    <div class="alert-err" id="loginError"></div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-input" id="loginUser" placeholder="admin" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div style="position:relative">
+        <input class="form-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        <button onclick="togglePw('loginPass','pwEye')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px" id="pwEye">👁️</button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Masuk</button>
+    <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--text3)">Default: admin / admin123</p>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD -->
+<div class="modal-overlay" id="changePwModal">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-head">
+      <div class="modal-title">🔑 Ganti Password</div>
+      <button class="modal-close" onclick="document.getElementById('changePwModal').classList.remove('open')">✕</button>
+    </div>
+    <div class="alert-err" id="changePwError"></div>
+    <div class="alert-ok" id="changePwSuccess"></div>
+    <div class="form-group"><label class="form-label">Username Baru</label><input class="form-input" id="newUser" placeholder="admin"></div>
+    <div class="form-group"><label class="form-label">Password Lama</label><input class="form-input" id="oldPass" type="password" placeholder="••••••••"></div>
+    <div class="form-group"><label class="form-label">Password Baru</label><input class="form-input" id="newPass" type="password" placeholder="Minimal 6 karakter"></div>
+    <div class="form-group"><label class="form-label">Konfirmasi Password Baru</label><input class="form-input" id="newPass2" type="password" placeholder="Ulangi password baru"></div>
+    <button class="btn-primary" onclick="doChangePassword()">Simpan Password Baru</button>
+  </div>
+</div>
+
+<!-- ADMIN MODAL -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">⚙️ Panel Admin</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-edit" onclick="openChangePw()" style="font-size:12px;padding:6px 10px">🔑 Password</button>
+        <button class="btn-danger" onclick="doLogout()" style="padding:6px 10px;font-size:12px">Keluar</button>
+        <button class="modal-close" onclick="closeAdmin()">✕</button>
+      </div>
+    </div>
+
+    <div class="wa-config">
+      <div class="wa-config-title">📱 Nomor WhatsApp Toko</div>
+      <input class="form-input" id="waNumber" placeholder="6281234567890" type="tel">
+      <small style="color:var(--text3);font-size:12px;margin-top:6px;display:block">Format: kode negara + nomor. Contoh: 6281234567890</small>
+      <button class="btn-primary" style="margin-top:12px;width:auto;padding:8px 20px;font-size:13px" onclick="saveWA()">Simpan Nomor</button>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" id="tabBtnList" onclick="switchAdminTab('list',this)">📦 Daftar Produk</button>
+      <button class="admin-tab" id="tabBtnAdd" onclick="switchAdminTab('add',this)">➕ Tambah / Edit</button>
+      <button class="admin-tab" id="tabBtnExcel" onclick="switchAdminTab('excel',this)">📊 Import Excel</button>
+    </div>
+
+    <!-- TAB LIST -->
+    <div id="adminTabList"><div id="adminProductList"></div></div>
+
+    <!-- TAB ADD/EDIT -->
+    <div id="adminTabAdd" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Foto Produk</label>
+        <div class="img-upload-area" id="imgUploadArea" onclick="document.getElementById('fileInput').click()">
+          <div id="imgPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:6px">
+            <span class="img-upload-icon">🖼️</span>
+            <span class="img-upload-label">Klik untuk upload foto</span>
+            <span style="font-size:11px;color:var(--text3)">JPG, PNG, WEBP — maks 2MB</span>
+          </div>
+          <img id="imgPreview" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;">
+          <div class="img-upload-overlay" id="imgOverlay"><span>🔄 Ganti Foto</span></div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+        <div class="img-actions" id="imgActions" style="display:none">
+          <button class="btn-img-remove" onclick="removeImage()">🗑️ Hapus Foto</button>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Kategori *</label>
+          <select class="form-select" id="fKategori">
+            <option value="laptop">💻 Laptop</option>
+            <option value="handphone">📱 Handphone</option>
+            <option value="aksesoris">🎧 Aksesoris</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Icon Emoji <span style="color:var(--text3)">(jika tanpa foto)</span></label>
+          <input class="form-input" id="fIcon" placeholder="💻" maxlength="4">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Brand *</label><input class="form-input" id="fBrand" placeholder="Apple, Samsung, dll"></div>
+        <div class="form-group"><sz class="form-label">Nama Produk *</label><input class="form-input" id="fNama" placeholder="iPhone 15 Pro"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Spesifikasi Singkat</label><textarea class="form-textarea" id="fSpec" placeholder="Chip A17 Pro, 256GB, Titanium..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Harga (Rp) *</label><input class="form-input" id="fHarga" type="number" placeholder="15000000"></div>
+        <div class="form-group"><label class="form-label">Stok *</label><input class="form-input" id="fStok" type="number" placeholder="10" min="0"></div>
+      </div>
+      <input type="hidden" id="editId">
+      <button class="btn-primary" onclick="simpanProduk()" id="btnSimpanProduk">Simpan Produk</button>
+    </div>
+
+    <!-- TAB EXCEL -->
+    <div id="adminTabExcel" style="display:none">sk
+      <!-- STEP 1: DOWNLOAD TEMPLATE -->
+      <div class="excel-box green">
+        <div class="excel-box-title green">📥 Langkah 1 — Download Template</div>
+        <div class="excel-box-desc">Download file Excel dengan data produk saat ini. Edit kolom <strong style="color:#fff">Stok</strong> (dan opsional <strong style="color:#fff">Harga</strong>), lalu upload kembali di bawah.</div>
+        <button class="btn-green" onclick="downloadTemplate()">⬇️ Download Template Excel (.xlsx)</button>
+        <div class="template-note">
+          <strong>Kolom dalam template:</strong><br>
+          <code>ID</code> jangan diubah &nbsp;·&nbsp; <code>Brand</code> &nbsp;·&nbsp; <code>Nama</code> &nbsp;·&nbsp; <code>Kategori</code> &nbsp;·&nbsp; <code>Harga</code> &nbsp;·&nbsp; <strong><code>Stok</code></strong> ← kolom utama yang diupdate<br><br>
+          💡 Pencocokan berdasarkan <code>ID</code>. Hanya <code>Stok</code> dan <code>Harga</code> yang akan diperbarui. Kolom lain diabaikan.
+        </div>
+      </div>
+
+      <!-- STEP 2: UPLOAD -->
+      <div class="excel-box purple">
+        <div class="excel-box-title purple">📤 Langkah 2 — Upload File Excel</div>
+        <div class="excel-box-desc">Upload file <code style="background:rgba(108,99,255,0.2);color:var(--accent2);padding:1px 5px;border-radius:3px">.xlsx</code> atau <code style="background:rgba(108,99,255,0.2);color:var(--accent2);padding:1px 5px;border-radius:3px">.xls</code> yang sudah diedit. Preview perubahan akan muncul sebelum diterapkan.</div>
+        <div class="drop-zone" id="excelDropZone">
+          <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" onchange="handleExcelUpload(event)">
+          <div class="drop-zone-icon">📊</div>
+          <div class="drop-zone-text">Klik atau seret file Excel ke sini</div>
+          <div class="drop-zone-sub">.xlsx · .xls · .csv — maks 5MB</div>
+        </div>
+      </div>
+
+      <!-- PREVIEW RESULTS -->
+      <div id="excelPreviewSection" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700">🔍 Preview Perubahan</div>
+          <div class="preview-actions" style="margin-top:0">
+            <button class="btn-apply" id="btnApplyExcel" onclick="applyExcelChanges()">✅ Terapkan Perubahan</button>
+            <button class="btn-cancel2" onclick="cancelExcelPreview()">✕ Batal</button>
+          </div>
+        </div>
+        <div id="excelSummary" class="preview-summary"></div>
+        <div class="preview-wrap">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Produk</th>
+                <th>Kat.</th>
+                <th>Stok</th>
+                <th>Harga</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="excelPreviewBody"></tbody>
+          </table>
+        </div>
+        <div class="preview-actions" style="margin-top:14px">
+          <button class="btn-apply" onclick="applyExcelChanges()">✅ Terapkan Perubahan</button>
+          <button class="btn-cancel2" onclick="cancelExcelPreview()">✕ Batal</button>
+        </div>
+      </div>
+
+    </div><!-- /adminTabExcel -->
+  </div>
+</div>
+
+<!-- STOK MODAL -->
+<div class="modal-overlay" id="stokModal">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-head">
+      <div class="modal-title">📦 Edit Stok</div>
+      <button class="modal-close" onclick="closeStokModal()">✕</button>
+    </div>
+    <div id="stokModalContent"></div>
+  </div>
+</div>
+
+<script>
+// ======== STATE ========
+let isLoggedIn = false;
+let activeFilter = 'semua';
+let searchQuery = '';
+let currentImageBase64 = null;
+let excelRows = []; // parsed excel preview data
+
+let config = JSON.parse(localStorage.getItem('ts_config') || JSON.stringify({wa:'6281234567890'}));
+function getCreds(){ return JSON.parse(localStorage.getItem('ts_creds') || JSON.stringify({user:'admin',pass:'admin123'})); }
+
+let products = const r = await fetch("/api/products");
+products = await r.json();
+if(!products){
+  products = [
+    {id:1,kategori:'laptop',icon:'💻',img:null,brand:'ASUS',nama:'VivoBook 15 OLED',spec:'Intel i5-1235U, 8GB RAM, 512GB SSD, 15.6" OLED',harga:9499000,stok:5},
+    {id:2,kategori:'laptop',icon:'💻',img:null,brand:'Lenovo',nama:'IdeaPad Slim 5i',spec:'Intel i7-12700H, 16GB RAM, 1TB SSD, 14" 2.8K',harga:13999000,stok:3},
+    {id:3,kategori:'laptop',icon:'💻',img:null,brand:'Apple',nama:'MacBook Air M2',spec:'Apple M2, 8GB RAM, 256GB SSD, 13.6" Liquid Retina',harga:18499000,stok:2},
+    {id:4,kategori:'laptop',icon:'💻',img:null,brand:'HP',nama:'Pavilion Plus 14',spec:'Intel i5-12500H, 16GB RAM, 512GB SSD, 14" 2.8K',harga:11499000,stok:0},
+    {id:5,kategori:'handphone',icon:'📱',img:null,brand:'Samsung',nama:'Galaxy S24 Ultra',spec:'12GB RAM, 256GB, Snapdragon 8 Gen 3, 200MP',harga:19999000,stok:4},
+    {id:6,kategori:'handphone',icon:'📱',img:null,brand:'Apple',nama:'iPhone 16 Pro',spec:'A18 Pro, 256GB, 48MP ProVision, Titanium',harga:22499000,stok:2},
+    {id:7,kategori:'handphone',icon:'📱',img:null,brand:'Xiaomi',nama:'14T Pro',spec:'12GB RAM, 512GB, Snapdragon 8s Gen 3, 50MP',harga:8999000,stok:8},
+    {id:8,kategori:'aksesoris',icon:'🎧',img:null,brand:'Sony',nama:'WH-1000XM5',spec:'ANC Terbaik, 30 jam baterai, Wireless',harga:4299000,stok:6},
+    {id:9,kategori:'aksesoris',icon:'🖱️',img:null,brand:'Logitech',nama:'MX Master 3S',spec:'Wireless, 8K DPI, Silent Click, Multi-device',harga:1299000,stok:12},
+    {id:10,kategori:'aksesoris',icon:'⌨️',img:null,brand:'Keychron',nama:'K3 Pro',spec:'Wireless, Hot-swap, Gateron Red, TKL Layout',harga:1599000,stok:7},
+  ];
+  saveProducts();
+}
+let nextId = Math.max(...products.map(p=>p.id), 0) + 1;
+
+function saveProducts(){ await fetch("/api/save-products", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(products)
+});
+function saveConfig(){ localStorage.setItem('ts_config', JSON.stringify(config)); }
+function formatRp(n){ return 'Rp ' + n.toLocaleString('id-ID'); }
+function stokInfo(s){
+  if(s===0) return {label:'Habis',cls:'habis'};
+  if(s<=3) return {label:'Sisa '+s,cls:'sedikit'};
+  return {label:'Tersedia',cls:'ada'};
+}
+
+// ======== RENDER ========
+function render(){
+  const filtered = products.filter(p=>{
+    const mk = activeFilter==='semua' || p.kategori===activeFilter;
+    const q = searchQuery.toLowerCase();
+    const ms = !q || p.nama.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q) || (p.spec||'').toLowerCase().includes(q);
+    return mk && ms;
+  });
+  document.getElementById('statProduk').textContent = products.filter(p=>p.stok>0).length;
+  const grid = document.getElementById('productGrid');
+  const empty = document.getElementById('emptyState');
+  if(!filtered.length){ grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  grid.innerHTML = filtered.map(p=>{
+    const si = stokInfo(p.stok);
+    const waMsg = encodeURIComponent(`Halo, saya tertarik dengan *${p.brand} ${p.nama}* (${formatRp(p.harga)}). Apakah masih tersedia?`);
+    const waUrl = `https://wa.me/${config.wa}?text=${waMsg}`;
+    const btn = p.stok===0
+      ? `<span class="btn-wa disabled">❌ Stok Habis</span>`
+      : `<a class="btn-wa" href="${waUrl}" target="_blank">💬 Hubungi via WhatsApp</a>`;
+    const imgArea = p.img
+      ? `<img src="${p.img}" alt="${p.nama}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+      : `<span>${p.icon||'📦'}</span>`;
+    return `<div class="card">
+      <div class="card-img">${imgArea}<span class="badge-cat">${p.kategori}</span><span class="badge-stok ${si.cls}">${si.label}</span></div>
+      <div class="card-body">
+        <div class="card-brand">${p.brand}</div>
+        <div class="card-name">${p.nama}</div>
+        <div class="card-spec">${p.spec||''}</div>
+        <div class="card-price">${formatRp(p.harga)} <small>/ unit</small></div>
+        ${btn}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterKategori(kat, el){
+  activeFilter=kat;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const labels={semua:'Semua Produk',laptop:'💻 Laptop',handphone:'📱 Handphone',aksesoris:'🎧 Aksesoris'};
+  document.getElementById('sectionTitle').textContent=labels[kat];
+  render();
+}
+document.getElementById('searchInput').addEventListener('input',e=>{ searchQuery=e.target.value; render(); });
+
+// ======== AUTH ========
+function openAdmin(){
+  if(isLoggedIn){ showAdminPanel(); }
+  else{
+    document.getElementById('loginUser').value='';
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginError').style.display='none';
+    document.getElementById('loginModal').classList.add('open');
+    setTimeout(()=>document.getElementById('loginUser').focus(),100);
+  }
+}
+function closeLogin(){ document.getElementById('loginModal').classList.remove('open'); }
+document.getElementById('loginModal').addEventListener('click',function(e){ if(e.target===this)closeLogin(); });
+function togglePw(iid, bid){
+  const inp=document.getElementById(iid);
+  inp.type=inp.type==='password'?'text':'password';
+  document.getElementById(bid).textContent=inp.type==='password'?'👁️':'🙈';
+}
+function doLogin(){
+  const user=document.getElementById('loginUser').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const c=getCreds();
+  const err=document.getElementById('loginError');
+  if(user===c.user && pass===c.pass){
+    isLoggedIn=true; err.style.display='none'; closeLogin(); showAdminPanel();
+  } else {
+    err.textContent='❌ Username atau password salah!'; err.style.display='block';
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginPass').focus();
+  }
+}
+function doLogout(){ isLoggedIn=false; closeAdmin(); }
+function showAdminPanel(){
+  document.getElementById('waNumber').value=config.wa;
+  renderAdminList();
+  document.getElementById('adminModal').classList.add('open');
+}
+function openChangePw(){
+  ['newUser','oldPass','newPass','newPass2'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('newUser').value=getCreds().user;
+  document.getElementById('changePwError').style.display='none';
+  document.getElementById('changePwSuccess').style.display='none';
+  document.getElementById('changePwModal').classList.add('open');
+}
+document.getElementById('changePwModal').addEventListener('click',function(e){ if(e.target===this)this.classList.remove('open'); });
+function doChangePassword(){
+  const newUser=document.getElementById('newUser').value.trim();
+  const oldPass=document.getElementById('oldPass').value;
+  const newPass=document.getElementById('newPass').value;
+  const newPass2=document.getElementById('newPass2').value;
+  const err=document.getElementById('changePwError');
+  const ok=document.getElementById('changePwSuccess');
+  const c=getCreds();
+  err.style.display='none'; ok.style.display='none';
+  if(!newUser){err.textContent='Username tidak boleh kosong!';err.style.display='block';return;}
+  if(oldPass!==c.pass){err.textContent='❌ Password lama salah!';err.style.display='block';return;}
+  if(newPass.length<6){err.textContent='Password baru minimal 6 karakter!';err.style.display='block';return;}
+  if(newPass!==newPass2){err.textContent='❌ Konfirmasi tidak cocok!';err.style.display='block';return;}
+  localStorage.setItem('ts_creds',JSON.stringify({user:newUser,pass:newPass}));
+  ok.textContent='✅ Password berhasil diubah!'; ok.style.display='block';
+  setTimeout(()=>document.getElementById('changePwModal').classList.remove('open'),1500);
+}
+
+// ======== ADMIN PANEL ========
+function closeAdmin(){ document.getElementById('adminModal').classList.remove('open'); resetForm(); cancelExcelPreview(); }
+document.getElementById('adminModal').addEventListener('click',function(e){ if(e.target===this)closeAdmin(); });
+function saveWA(){
+  const val=document.getElementById('waNumber').value.trim().replace(/\D/g,'');
+  if(!val){alert('Masukkan nomor WA yang valid!');return;}
+  config.wa=val; saveConfig(); alert('✅ Nomor WhatsApp berhasil disimpan!'); render();
+}
+function switchAdminTab(tab,el){
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('adminTabList').style.display=tab==='list'?'':'none';
+  document.getElementById('adminTabAdd').style.display=tab==='add'?'':'none';
+  document.getElementById('adminTabExcel').style.display=tab==='excel'?'':'none';
+  if(tab==='list') renderAdminList();
+  if(tab==='add') resetForm();
+}
+function renderAdminList(){
+  const el=document.getElementById('adminProductList');
+  if(!products.length){ el.innerHTML='<div style="text-align:center;color:var(--text3);padding:24px">Belum ada produk.</div>'; return; }
+  el.innerHTML=products.map(p=>{
+    const si=stokInfo(p.stok);
+    const thumb=p.img?`<img src="${p.img}" alt="">`:`${p.icon||'📦'}`;
+    return `<div class="product-list-item">
+      <div class="item-thumb">${thumb}</div>
+      <div class="item-info">
+        <div class="item-name">${p.brand} ${p.nama}</div>
+        <div class="item-meta">${p.kategori} · ${formatRp(p.harga)} · <span class="badge-stok ${si.cls}" style="position:static;padding:2px 7px">${si.label} (${p.stok})</span></div>
+      </div>
+      <div class="item-actions">
+        <button class="btn-edit" onclick="editStok(${p.id})">Stok</button>
+        <button class="btn-edit" onclick="editProduk(${p.id})">Edit</button>
+        <button class="btn-danger" style="padding:6px 10px;font-size:12px" onclick="hapusProduk(${p.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ======== IMAGE ========
+function handleImageUpload(e){
+  const file=e.target.files[0]; if(!file) return;
+  if(file.size>2*1024*1024){ alert('Ukuran foto maksimal 2MB!'); e.target.value=''; return; }
+  const reader=new FileReader();
+  reader.onload=ev=>{ currentImageBase64=ev.target.result; showImagePreview(currentImageBase64); };
+  reader.readAsDataURL(file); e.target.value='';
+}
+function showImagePreview(src){
+  document.getElementById('imgPreview').src=src;
+  document.getElementById('imgPreview').style.display='block';
+  document.getElementById('imgPlaceholder').style.display='none';
+  document.getElementById('imgUploadArea').classList.add('has-image');
+  document.getElementById('imgActions').style.display='flex';
+}
+function removeImage(){
+  currentImageBase64=null;
+  document.getElementById('imgPreview').src='';
+  document.getElementById('imgPreview').style.display='none';
+  document.getElementById('imgPlaceholder').style.display='flex';
+  document.getElementById('imgUploadArea').classList.remove('has-image');
+  document.getElementById('imgActions').style.display='none';
+}
+
+// ======== STOK MODAL ========
+function editStok(id){
+  const p=products.find(x=>x.id===id); if(!p) return;
+  document.getElementById('stokModalContent').innerHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <div style="width:44px;height:44px;border-radius:8px;background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${p.img?`<img src="${p.img}" style="width:100%;height:100%;object-fit:cover">`:(p.icon||'📦')}</div>
+      <div><div style="font-weight:600;font-size:14px">${p.brand} ${p.nama}</div><div style="font-size:12px;color:var(--text3)">${p.kategori}</div></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Stok Saat Ini: <strong style="color:var(--accent2)">${p.stok}</strong></label>
+      <input class="form-input" id="stokVal" type="number" value="${p.stok}" min="0">
+    </div>
+    <button class="btn-primary" onclick="simpanStok(${id})">Simpan Stok</button>`;
+  document.getElementById('stokModal').classList.add('open');
+}
+function closeStokModal(){ document.getElementById('stokModal').classList.remove('open'); }
+document.getElementById('stokModal').addEventListener('click',function(e){ if(e.target===this)closeStokModal(); });
+function simpanStok(id){
+  const val=parseInt(document.getElementById('stokVal').value);
+  if(isNaN(val)||val<0){alert('Stok tidak valid!');return;}
+  const idx=products.findIndex(x=>x.id===id);
+  products[idx].stok=val;
+  saveProducts(); render(); renderAdminList(); closeStokModal();
+}
+
+// ======== EDIT/TAMBAH ========
+function editProduk(id){
+  const p=products.find(x=>x.id===id); if(!p) return;
+  document.getElementById('fKategori').value=p.kategori;
+  document.getElementById('fIcon').value=p.icon||'';
+  document.getElementById('fBrand').value=p.brand;
+  document.getElementById('fNama').value=p.nama;
+  document.getElementById('fSpec').value=p.spec||'';
+  document.getElementById('fHarga').value=p.harga;
+  document.getElementById('fStok').value=p.stok;
+  document.getElementById('editId').value=p.id;
+  document.getElementById('btnSimpanProduk').textContent='💾 Update Produk';
+  if(p.img){ currentImageBase64=p.img; showImagePreview(p.img); } else { removeImage(); currentImageBase64=null; }
+  switchAdminTab('add', document.getElementById('tabBtnAdd'));
+}
+function resetForm(){
+  ['fBrand','fNama','fSpec','fHarga','fStok','editId'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fKategori').value='laptop';
+  document.getElementById('fIcon').value='';
+  document.getElementById('btnSimpanProduk').textContent='Simpan Produk';
+  currentImageBase64=null; removeImage();
+}
+function simpanProduk(){
+  const kategori=document.getElementById('fKategori').value;
+  const icon=document.getElementById('fIcon').value.trim()||(kategori==='laptop'?'💻':kategori==='handphone'?'📱':'🎧');
+  const brand=document.getElementById('fBrand').value.trim();
+  const nama=document.getElementById('fNama').value.trim();
+  const spec=document.getElementById('fSpec').value.trim();
+  const harga=parseInt(document.getElementById('fHarga').value);
+  const stok=parseInt(document.getElementById('fStok').value);
+  const editId=document.getElementById('editId').value;
+  if(!brand||!nama||isNaN(harga)||isNaN(stok)){alert('Lengkapi semua kolom wajib!');return;}
+  if(editId){
+    const idx=products.findIndex(x=>x.id==editId);
+    products[idx]={...products[idx],kategori,icon,brand,nama,spec,harga,stok,img:currentImageBase64};
+  } else {
+    products.push({id:nextId++,kategori,icon,brand,nama,spec,harga,stok,img:currentImageBase64});
+  }
+  saveProducts(); render(); resetForm();
+  switchAdminTab('list', document.getElementById('tabBtnList'));
+  showToast(editId?'✅ Produk diupdate!':'✅ Produk ditambahkan!');
+}
+function hapusProduk(id){
+  const p=products.find(x=>x.id===id); if(!p) return;
+  if(!confirm(`Hapus "${p.brand} ${p.nama}"?`)) return;
+  products=products.filter(x=>x.id!==id);
+  saveProducts(); render(); renderAdminList();
+}
+
+// ========================================================
+// =================== EXCEL IMPORT =======================
+// ========================================================
+
+function downloadTemplate(){
+  if(typeof XLSX==='undefined'){ showToast('❌ Library Excel belum siap'); return; }
+  const rows = [
+    ['ID','Brand','Nama','Kategori','Harga','Stok'],
+    ...products.map(p=>[p.id, p.brand, p.nama, p.kategori, p.harga, p.stok])
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:6},{wch:14},{wch:28},{wch:14},{wch:14},{wch:8}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Stok Produk');
+  XLSX.writeFile(wb, `agres_id_stok_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('📥 Template berhasil didownload!');
+}
+
+// Drag & drop
+const dropZone = document.getElementById('excelDropZone');
+dropZone.addEventListener('dragover', e=>{ e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', ()=>{ dropZone.classList.remove('dragover'); });
+dropZone.addEventListener('drop', e=>{
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if(file) processExcelFile(file);
+});
+function handleExcelUpload(e){
+  const file = e.target.files[0];
+  if(file) processExcelFile(file);
+  e.target.value='';
+}
+
+function processExcelFile(file){
+  if(file.size > 5*1024*1024){ showToast('❌ File terlalu besar (maks 5MB)'); return; }
+  if(!/\.(xlsx|xls|csv)$/i.test(file.name)){ showToast('❌ Format tidak didukung (.xlsx/.xls/.csv)'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, {type:'array'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rawRows = XLSX.utils.sheet_to_json(ws, {defval:''});
+
+      if(!rawRows.length){ showToast('❌ File kosong atau format tidak dikenali'); return; }
+
+      // Normalize keys to lowercase
+      const rows = rawRows.map(r=>{
+        const out={};
+        for(const k in r) out[k.toLowerCase().trim()]=r[k];
+        return out;
+      });
+
+      if(!('id' in rows[0]) || !('stok' in rows[0])){
+        showToast('❌ Kolom "ID" dan "Stok" wajib ada di file Excel');
+        return;
+      }
+
+      // Parse rows
+      excelRows = rows.map(row=>{
+        const id = parseInt(row['id']);
+        const newStok = parseInt(row['stok']);
+        const newHarga = row['harga'] !== '' ? parseInt(row['harga']) : null;
+
+        if(isNaN(id)) return {status:'err', errMsg:'ID tidak valid', raw:row};
+
+        const p = products.find(x=>x.id===id);
+        if(!p) return {status:'err', id, errMsg:`ID ${id} tidak ditemukan di sistem`, raw:row};
+
+        if(isNaN(newStok) || newStok < 0)
+          return {status:'err', id, product:p, errMsg:'Nilai stok tidak valid (harus angka ≥ 0)', raw:row};
+
+        const stokChanged = newStok !== p.stok;
+        const hargaValid = newHarga !== null && !isNaN(newHarga) && newHarga > 0;
+        const hargaChanged = hargaValid && newHarga !== p.harga;
+
+        return {
+          status: (stokChanged || hargaChanged) ? 'ok' : 'same',
+          id, product:p,
+          oldStok:p.stok, newStok,
+          oldHarga:p.harga, newHarga: hargaValid ? newHarga : p.harga,
+          stokChanged, hargaChanged
+        };
+      });
+
+      renderExcelPreview();
+      showToast(`📊 ${rows.length} baris terbaca dari Excel`);
+    } catch(err){
+      console.error(err);
+      showToast('❌ Gagal membaca file. Pastikan format benar.');
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderExcelPreview(){
+  const countOk   = excelRows.filter(r=>r.status==='ok').length;
+  const countSame = excelRows.filter(r=>r.status==='same').length;
+  const countErr  = excelRows.filter(r=>r.status==='err').length;
+
+  document.getElementById('excelSummary').innerHTML = `
+    <span style="color:var(--green)">✅ <strong>${countOk}</strong> akan diubah</span>
+    <span style="color:var(--text3)">⬜ <strong>${countSame}</strong> tidak berubah</span>
+    ${countErr ? `<span style="color:var(--red)">❌ <strong>${countErr}</strong> error</span>` : ''}
+    <span style="color:var(--text2)">📦 Total: <strong>${excelRows.length}</strong> baris</span>
+  `;
+
+  const btn = document.getElementById('btnApplyExcel');
+  btn.disabled = countOk === 0;
+  btn.style.opacity = countOk === 0 ? '0.45' : '1';
+
+  document.getElementById('excelPreviewBody').innerHTML = excelRows.map(r=>{
+    if(r.status==='err'){
+      return `<tr class="row-err">
+        <td style="color:var(--text3)">${r.id||'—'}</td>
+        <td>${r.product ? r.product.brand+' '+r.product.nama : '—'}</td>
+        <td>—</td>
+        <td colspan="2" style="color:var(--red);font-size:12px">⚠️ ${r.errMsg}</td>
+        <td><span class="badge-change err">Error</span></td>
+      </tr>`;
+    }
+    const p = r.product;
+
+    const stokCell = r.stokChanged
+      ? `<span class="val-change"><span class="val-old">${r.oldStok}</span><span class="val-arrow">→</span><span class="${r.newStok>r.oldStok?'val-new-up':'val-new-dn'}">${r.newStok}</span></span>`
+      : `<span style="color:var(--text3)">${r.newStok}</span>`;
+
+    const hargaCell = r.hargaChanged
+      ? `<span class="val-change"><span class="val-old" style="font-size:11px">${formatRp(r.oldHarga)}</span><span class="val-arrow">→</span><span class="${r.newHarga>r.oldHarga?'val-new-up':'val-new-dn'}" style="font-size:12px">${formatRp(r.newHarga)}</span></span>`
+      : `<span style="color:var(--text3);font-size:12px">${formatRp(r.oldHarga)}</span>`;
+
+    return `<tr class="${r.status==='ok'?'row-ok':'row-same'}">
+      <td style="color:var(--text3)">${p.id}</td>
+      <td><strong>${p.brand}</strong> ${p.nama}</td>
+      <td style="color:var(--text3)">${p.kategori}</td>
+      <td>${stokCell}</td>
+      <td>${hargaCell}</td>
+      <td><span class="badge-change ${r.status==='ok'?'ok':'same'}">${r.status==='ok'?'Diubah':'Sama'}</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('excelPreviewSection').style.display='block';
+  document.getElementById('excelPreviewSection').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function applyExcelChanges(){
+  const toApply = excelRows.filter(r=>r.status==='ok');
+  if(!toApply.length){ showToast('Tidak ada perubahan untuk diterapkan.'); return; }
+  let n=0;
+  for(const r of toApply){
+    const idx = products.findIndex(p=>p.id===r.id);
+    if(idx===-1) continue;
+    products[idx].stok = r.newStok;
+    if(r.hargaChanged) products[idx].harga = r.newHarga;
+    n++;
+  }
+  saveProducts(); render(); renderAdminList();
+  cancelExcelPreview();
+  switchAdminTab('list', document.getElementById('tabBtnList'));
+  showToast(`✅ ${n} produk berhasil diupdate dari Excel!`);
+}
+
+function cancelExcelPreview(){
+  excelRows=[];
+  document.getElementById('excelPreviewSection').style.display='none';
+  document.getElementById('excelPreviewBody').innerHTML='';
+  document.getElementById('excelSummary').innerHTML='';
+  document.getElementById('excelFileInput').value='';
+}
+
+// ======== TOAST ========
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){
+    t=document.createElement('div'); t.id='toast';
+    t.style.cssText='position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1e1e2e;border:1px solid var(--border);color:var(--text);padding:10px 22px;border-radius:100px;font-size:14px;font-weight:500;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.4);transition:opacity .3s;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{ t.style.opacity='0'; },2800);
+}
+
+render();
+</script>
+</body>
+</html>
