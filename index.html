@@ -410,46 +410,48 @@ let currentImageBase64 = null;
 let excelRows = []; // parsed excel preview data
 
 let config;
-let products;
+let products = [];
 let creds;
 
-const DEFAULT_PRODUCTS = [
-  {id:1,kategori:'laptop',icon:'💻',img:null,brand:'ASUS',nama:'VivoBook 15 OLED',spec:'Intel i5-1235U, 8GB RAM, 512GB SSD, 15.6" OLED',harga:9499000,stok:5},
-  {id:2,kategori:'laptop',icon:'💻',img:null,brand:'Lenovo',nama:'IdeaPad Slim 5i',spec:'Intel i7-12700H, 16GB RAM, 1TB SSD, 14" 2.8K',harga:13999000,stok:3},
-  {id:3,kategori:'laptop',icon:'💻',img:null,brand:'Apple',nama:'MacBook Air M2',spec:'Apple M2, 8GB RAM, 256GB SSD, 13.6" Liquid Retina',harga:18499000,stok:2},
-  {id:4,kategori:'laptop',icon:'💻',img:null,brand:'HP',nama:'Pavilion Plus 14',spec:'Intel i5-12500H, 16GB RAM, 512GB SSD, 14" 2.8K',harga:11499000,stok:0},
-  {id:5,kategori:'handphone',icon:'📱',img:null,brand:'Samsung',nama:'Galaxy S24 Ultra',spec:'12GB RAM, 256GB, Snapdragon 8 Gen 3, 200MP',harga:19999000,stok:4},
-  {id:6,kategori:'handphone',icon:'📱',img:null,brand:'Apple',nama:'iPhone 16 Pro',spec:'A18 Pro, 256GB, 48MP ProVision, Titanium',harga:22499000,stok:2},
-  {id:7,kategori:'handphone',icon:'📱',img:null,brand:'Xiaomi',nama:'14T Pro',spec:'12GB RAM, 512GB, Snapdragon 8s Gen 3, 50MP',harga:8999000,stok:8},
-  {id:8,kategori:'aksesoris',icon:'🎧',img:null,brand:'Sony',nama:'WH-1000XM5',spec:'ANC Terbaik, 30 jam baterai, Wireless',harga:4299000,stok:6},
-  {id:9,kategori:'aksesoris',icon:'🖱️',img:null,brand:'Logitech',nama:'MX Master 3S',spec:'Wireless, 8K DPI, Silent Click, Multi-device',harga:1299000,stok:12},
-  {id:10,kategori:'aksesoris',icon:'⌨️',img:null,brand:'Keychron',nama:'K3 Pro',spec:'Wireless, Hot-swap, Gateron Red, TKL Layout',harga:1599000,stok:7},
-];
-
-function loadData() {
-  try {
-    const savedProducts = localStorage.getItem('ts_products');
-    products = savedProducts ? JSON.parse(savedProducts) : DEFAULT_PRODUCTS;
-    const savedConfig = localStorage.getItem('ts_config');
-    config = savedConfig ? JSON.parse(savedConfig) : { wa: '6281234567890' };
-    const savedCreds = localStorage.getItem('ts_creds');
-    creds = savedCreds ? JSON.parse(savedCreds) : { user: 'admin', pass: 'admin123' };
-  } catch (error) {
-    console.error('Failed to load data:', error);
-    products = DEFAULT_PRODUCTS;
-    config = { wa: '6281234567890' };
-    creds = { user: 'admin', pass: 'admin123' };
-  }
+function formatRp(num){
+  return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(num||0);
 }
-
-loadData();
+function stokInfo(stok){
+  if(stok<=0) return {cls:'habis',label:'Habis'};
+  if(stok<=5) return {cls:'sedikit',label:'Terbatas'};
+  return {cls:'ada',label:'Tersedia'};
+}
+function getCreds(){
+  return creds || JSON.parse(localStorage.getItem('ts_creds')) || {user:'admin',pass:'admin123'};
+}
 let nextId = Math.max(...products.map(p=>p.id), 0) + 1;
 
-function saveProducts() {
-  localStorage.setItem('ts_products', JSON.stringify(products));
+async function saveProducts() { 
+  await fetch('/api/save-data', { 
+    method: 'POST', 
+    headers: { 'Content-Type': 'application/json' }, 
+    body: JSON.stringify({ type: 'products', data: products }) 
+  }); 
 }
-function saveConfig() {
-  localStorage.setItem('ts_config', JSON.stringify(config));
+async function saveConfig() {
+  try {
+    const response = await fetch('/api/save-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ type: 'config', data: config })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Failed to save config:', error);
+  }
 }
 
 // ======== RENDER ========
@@ -499,9 +501,6 @@ function filterKategori(kat, el){
 document.getElementById('searchInput').addEventListener('input',e=>{ searchQuery=e.target.value; render(); });
 
 // ======== AUTH ========
-function getCreds(){
-  return creds || { user: 'admin', pass: 'admin123' };
-}
 function openAdmin(){
   if(isLoggedIn){ showAdminPanel(); }
   else{
@@ -560,7 +559,6 @@ function doChangePassword(){
   if(newPass.length<6){err.textContent='Password baru minimal 6 karakter!';err.style.display='block';return;}
   if(newPass!==newPass2){err.textContent='❌ Konfirmasi tidak cocok!';err.style.display='block';return;}
   localStorage.setItem('ts_creds',JSON.stringify({user:newUser,pass:newPass}));
-  creds = {user:newUser, pass:newPass};
   ok.textContent='✅ Password berhasil diubah!'; ok.style.display='block';
   setTimeout(()=>document.getElementById('changePwModal').classList.remove('open'),1500);
 }
@@ -885,7 +883,7 @@ function showToast(msg){
   t._timer=setTimeout(()=>{ t.style.opacity='0'; },2800);
 }
 
-render();
+window.addEventListener("DOMContentLoaded", ()=>{ if(typeof loadData==="function"){ loadData(); } else { render(); }});
 </script>
 </body>
 </html>
