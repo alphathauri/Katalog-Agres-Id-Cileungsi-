@@ -1,65 +1,22 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-
 export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      error: 'Method not allowed'
-    });
-  }
+  const { type, data } = req.body;
+  const binId = type === 'config'
+    ? process.env.JSONBIN_CONFIG_BIN
+    : process.env.JSONBIN_PRODUCTS_BIN;
 
-  try {
+  if (!binId) return res.status(400).json({ error: 'Unknown type' });
 
-    const body = req.body;
+  const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': process.env.JSONBIN_API_KEY
+    },
+    body: JSON.stringify(data)
+  });
 
-    if (body.config) {
-
-      await supabase
-        .from('settings')
-        .upsert({
-          id: 1,
-          wa: body.config.wa
-        });
-
-    }
-
-    if (body.products) {
-
-      await supabase
-        .from('products')
-        .delete()
-        .neq('id', 0);
-
-      const rows = body.products.map(p => ({
-        nama: p.nama,
-        harga: p.harga,
-        stok: p.stok,
-        gambar: p.gambar
-      }));
-
-      if (rows.length) {
-        await supabase
-          .from('products')
-          .insert(rows);
-      }
-
-    }
-
-    return res.status(200).json({
-      success: true
-    });
-
-  } catch (err) {
-
-    return res.status(500).json({
-      success: false,
-      error: err.message
-    });
-
-  }
+  const result = await response.json();
+  res.status(200).json({ ok: true, result });
 }
