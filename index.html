@@ -409,8 +409,16 @@ let searchQuery = '';
 let currentImageBase64 = null;
 let excelRows = []; // parsed excel preview data
 
-let config = JSON.parse(localStorage.getItem('ts_config') || JSON.stringify({wa:'6281234567890'}));
-function getCreds(){ return JSON.parse(localStorage.getItem('ts_creds') || JSON.stringify({user:'admin',pass:'admin123'})); }
+let config = JSON.parse(async function loadData() {
+  const res = await fetch("/api/get-data");
+  const data = await res.json();
+
+  products = data.products;
+  config = data.config;
+  creds = data.creds;
+
+  renderProducts();
+}
 
 let products = const r = await fetch("/api/products");
 products = await r.json();
@@ -431,19 +439,25 @@ if(!products){
 }
 let nextId = Math.max(...products.map(p=>p.id), 0) + 1;
 
-function saveProducts(){ await fetch("/api/save-products", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(products)
-});
-function saveConfig(){ localStorage.setItem('ts_config', JSON.stringify(config)); }
-function formatRp(n){ return 'Rp ' + n.toLocaleString('id-ID'); }
-function stokInfo(s){
-  if(s===0) return {label:'Habis',cls:'habis'};
-  if(s<=3) return {label:'Sisa '+s,cls:'sedikit'};
-  return {label:'Tersedia',cls:'ada'};
+async function saveProducts() {
+  await fetch("/api/save-data", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "products",
+      data: products
+    })
+  });
+}
+async function saveConfig() {
+  await fetch("/api/save-data", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      type: "config",
+      data: config
+    })
+  });
 }
 
 // ======== RENDER ========
