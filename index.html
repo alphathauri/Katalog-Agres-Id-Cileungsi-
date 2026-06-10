@@ -421,7 +421,6 @@ async function loadData() {
     }
     const data = await res.json();
     
-    // Assign data to your global variables
     products = data.products;
     config = data.config; // No need for JSON.parse if the backend returns an object
     creds = data.creds;
@@ -451,25 +450,32 @@ if(!products){
 }
 let nextId = Math.max(...products.map(p=>p.id), 0) + 1;
 
-async function saveProducts() {
-  await fetch("/api/save-data", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      type: "products",
-      data: products
-    })
-  });
+async function saveProducts() { 
+  await fetch('/api/save-data', { 
+    method: 'POST', 
+    headers: { 'Content-Type': 'application/json' }, 
+    body: JSON.stringify({ type: 'products', data: products }) 
+  }); 
 }
 async function saveConfig() {
-  await fetch("/api/save-data", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      type: "config",
-      data: config
-    })
-  });
+  try {
+    const response = await fetch('/api/save-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ type: 'config', data: config })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Failed to save config:', error);
+  }
 }
 
 // ======== RENDER ========
