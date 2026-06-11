@@ -695,7 +695,7 @@ function simpanStok(id){
   if(isNaN(val)||val<0){alert('Stok tidak valid!');return;}
   const idx=products.findIndex(x=>x.id===id);
   products[idx].stok=val;
-  saveProducts(); render(); renderAdminList(); closeStokModal();
+  await saveProducts(); render(); renderAdminList(); closeStokModal();
 }
 
 // ======== EDIT/TAMBAH ========
@@ -737,7 +737,7 @@ function simpanProduk(){
   } else {
     products.push({id:nextId++,kategori,icon,brand,nama,spec,harga,stok,img:currentImageBase64});
   }
-  saveProducts(); render(); resetForm();
+  await saveProducts(); render(); renderAdminList();
   switchAdminTab('list', document.getElementById('tabBtnList'));
   showToast(editId?'✅ Produk diupdate!':'✅ Produk ditambahkan!');
 }
@@ -745,7 +745,7 @@ function hapusProduk(id){
   const p=products.find(x=>x.id===id); if(!p) return;
   if(!confirm(`Hapus "${p.brand} ${p.nama}"?`)) return;
   products=products.filter(x=>x.id!==id);
-  saveProducts(); render(); renderAdminList();
+ await saveProducts(); render(); renderAdminList();
 }
 
 // ========================================================
@@ -910,7 +910,7 @@ function renderExcelPreview(){
   document.getElementById('excelPreviewSection').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-function applyExcelChanges(){
+async function applyExcelChanges(){
   const toApply = excelRows.filter(r=>r.status==='ok');
   const toAdd = excelRows.filter(r=>r.status==='new');
   if(!toApply.length && !toAdd.length){ showToast('Tidak ada perubahan untuk diterapkan.'); return; }
@@ -930,7 +930,7 @@ function applyExcelChanges(){
     products.push({id:nextId++, kategori:kat, icon, brand:r.brand, nama:r.nama, spec:r.spec, harga:r.newHarga, stok:r.newStok, img:null});
   }
 
-  saveProducts(); render(); renderAdminList();
+  await saveProducts(); render(); renderAdminList();
   cancelExcelPreview();
   switchAdminTab('list', document.getElementById('tabBtnList'));
   showToast(`✅ ${toApply.length} diupdate + ${toAdd.length} produk baru ditambahkan!`);
