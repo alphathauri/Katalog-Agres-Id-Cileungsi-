@@ -690,7 +690,7 @@ function editStok(id){
 }
 function closeStokModal(){ document.getElementById('stokModal').classList.remove('open'); }
 document.getElementById('stokModal').addEventListener('click',function(e){ if(e.target===this)closeStokModal(); });
-function simpanStok(id){
+async function simpanStok(id){
   const val=parseInt(document.getElementById('stokVal').value);
   if(isNaN(val)||val<0){alert('Stok tidak valid!');return;}
   const idx=products.findIndex(x=>x.id===id);
@@ -721,7 +721,7 @@ function resetForm(){
   document.getElementById('btnSimpanProduk').textContent='Simpan Produk';
   currentImageBase64=null; removeImage();
 }
-function simpanProduk(){
+async function simpanProduk(){
   const kategori=document.getElementById('fKategori').value;
   const icon=document.getElementById('fIcon').value.trim()||(kategori==='laptop'?'💻':kategori==='handphone'?'📱':'🎧');
   const brand=document.getElementById('fBrand').value.trim();
@@ -741,7 +741,7 @@ function simpanProduk(){
   switchAdminTab('list', document.getElementById('tabBtnList'));
   showToast(editId?'✅ Produk diupdate!':'✅ Produk ditambahkan!');
 }
-function hapusProduk(id){
+async function hapusProduk(id){
   const p=products.find(x=>x.id===id); if(!p) return;
   if(!confirm(`Hapus "${p.brand} ${p.nama}"?`)) return;
   products=products.filter(x=>x.id!==id);
