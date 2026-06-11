@@ -156,6 +156,15 @@ header{background:rgba(10,10,15,0.96);backdrop-filter:blur(12px);border-bottom:1
 .val-new-dn{color:var(--red);font-weight:700;}
 .preview-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
 
+/* ===== HERO SLIDESHOW ===== */
+.hero-bg{position:absolute;inset:0;z-index:0;}
+.hero-bg-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease-in-out;}
+.hero-bg-slide.active{opacity:1;}
+.hero-bg-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,10,15,0.82) 0%,rgba(18,16,31,0.75) 50%,rgba(10,15,26,0.82) 100%);}
+.hero-content{position:relative;z-index:1;}
+.hero-dots{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:2;}
+.hero-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;transition:background .3s,transform .3s;}
+.hero-dot.active{background:var(--accent2);transform:scale(1.3);}
 footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center;color:var(--text3);font-size:13px;margin-top:60px;}
 footer strong{color:var(--text2);}
 @media(max-width:600px){
@@ -187,14 +196,20 @@ footer strong{color:var(--text2);}
   </div>
 </header>
 
-<section class="hero">
-  <h1>Gadget Terbaik<br>Harga Terbaik</h1>
-  <p>Laptop, handphone, dan aksesoris pilihan. Garansi resmi, pengiriman cepat ke seluruh Indonesia.</p>
-  <div class="hero-stats">
-    <div class="stat"><div class="stat-num" id="statProduk">0</div><div class="stat-label">Produk Tersedia</div></div>
-    <div class="stat"><div class="stat-num">3</div><div class="stat-label">Kategori</div></div>
-    <div class="stat"><div class="stat-num">⚡</div><div class="stat-label">Fast Response WA</div></div>
+<section class="hero" id="heroSection">
+  <div class="hero-bg" id="heroBg">
+    <div class="hero-bg-overlay"></div>
   </div>
+  <div class="hero-content">
+    <h1>Gadget Terbaik<br>Harga Terbaik</h1>
+    <p>Laptop, handphone, dan aksesoris pilihan. Garansi resmi, pengiriman cepat ke seluruh Indonesia.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num" id="statProduk">0</div><div class="stat-label">Produk Tersedia</div></div>
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">Kategori</div></div>
+      <div class="stat"><div class="stat-num">⚡</div><div class="stat-label">Fast Response WA</div></div>
+    </div>
+  </div>
+  <div class="hero-dots" id="heroDots"></div>
 </section>
 
 <div class="filter-bar">
@@ -863,6 +878,63 @@ function showToast(msg){
   t._timer=setTimeout(()=>{t.style.opacity='0';},2800);
 }
 
+// ===== HERO SLIDESHOW =====
+async function loadHeroBanners(){
+  try{
+    const r = await fetch(`${SUPA_URL}/storage/v1/object/list/banner`,{
+      method:'POST',
+      headers:{...HEADERS,'Content-Type':'application/json'},
+      body: JSON.stringify({limit:20, offset:0, prefix:''})
+    });
+    const files = await r.json();
+    if(!Array.isArray(files)||!files.length) return;
+    const imgs = files
+      .filter(f=>f.name&&/\.(jpg|jpeg|png|webp|gif)$/i.test(f.name))
+      .map(f=>`${SUPA_URL}/storage/v1/object/public/banner/${f.name}`);
+    if(!imgs.length) return;
+    initSlideshow(imgs);
+  } catch(e){ console.error('Banner error:',e); }
+}
+
+function initSlideshow(imgs){
+  const bg = document.getElementById('heroBg');
+  const dotsEl = document.getElementById('heroDots');
+  const overlay = bg.querySelector('.hero-bg-overlay');
+  let current = 0;
+
+  // Buat slides
+  const slides = imgs.map((src,i)=>{
+    const div = document.createElement('div');
+    div.className = 'hero-bg-slide' + (i===0?' active':'');
+    div.style.backgroundImage = `url('${src}')`;
+    bg.insertBefore(div, overlay);
+    return div;
+  });
+
+  // Buat dots
+  if(imgs.length>1){
+    imgs.forEach((_,i)=>{
+      const dot = document.createElement('div');
+      dot.className = 'hero-dot' + (i===0?' active':'');
+      dot.onclick = ()=>goTo(i);
+      dotsEl.appendChild(dot);
+    });
+  }
+
+  function goTo(idx){
+    slides[current].classList.remove('active');
+    dotsEl.children[current]?.classList.remove('active');
+    current = idx;
+    slides[current].classList.add('active');
+    dotsEl.children[current]?.classList.add('active');
+  }
+
+  if(imgs.length>1){
+    setInterval(()=>goTo((current+1)%imgs.length), 4500);
+  }
+}
+
+loadHeroBanners();
 async function loadData(){
   if(isLoaded) return;
   isLoaded=true;
