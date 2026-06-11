@@ -464,7 +464,7 @@ async function saveConfig() {
 // ======== RENDER ========
 function render(){
   const filtered = products.filter(p=>{
-    const mk = activeFilter==='semua' || p.kategori===activeFilter;
+    const mk = activeFilter==='semua' || (p.kategori||'').toLowerCase()===activeFilter;
     const q = searchQuery.toLowerCase();
     const ms = !q || p.nama.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q) || (p.spec||'').toLowerCase().includes(q);
     return mk && ms;
