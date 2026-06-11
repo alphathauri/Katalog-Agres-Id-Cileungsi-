@@ -603,7 +603,7 @@ function switchAdminTab(tab,el){
   document.getElementById('adminTabAdd').style.display=tab==='add'?'':'none';
   document.getElementById('adminTabExcel').style.display=tab==='excel'?'':'none';
   if(tab==='list') renderAdminList();
-  if(tab==='add') resetForm();
+  
 }
 function renderAdminList(){
   const el=document.getElementById('adminProductList');
@@ -700,6 +700,7 @@ function simpanStok(id){
 
 // ======== EDIT/TAMBAH ========
 function editProduk(id){
+  resetForm(); // ← tambahkan ini di baris pertama
   const p=products.find(x=>x.id===id); if(!p) return;
   document.getElementById('fKategori').value=p.kategori;
   document.getElementById('fIcon').value=p.icon||'';
