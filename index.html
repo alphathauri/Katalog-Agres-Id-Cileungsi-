@@ -794,31 +794,38 @@ function processExcelFile(file){
 
       if(!rawRows.length){ showToast('❌ File kosong atau format tidak dikenali'); return; }
 
-      // Normalize keys to lowercase
       const rows = rawRows.map(r=>{
         const out={};
         for(const k in r) out[k.toLowerCase().trim()]=r[k];
         return out;
       });
 
-      if(!('id' in rows[0]) || !('stok' in rows[0])){
-        showToast('❌ Kolom "ID" dan "Stok" wajib ada di file Excel');
+      if(!('stok' in rows[0])){
+        showToast('❌ Kolom "Stok" wajib ada di file Excel');
         return;
       }
 
-      // Parse rows
       excelRows = rows.map(row=>{
-        const id = parseInt(row['id']);
+        const id = row['id'] !== '' ? parseInt(row['id']) : null;
         const newStok = parseInt(row['stok']);
         const newHarga = row['harga'] !== '' ? parseInt(row['harga']) : null;
+        const brand = (row['brand']||'').toString().trim();
+        const nama = (row['nama']||'').toString().trim();
+        const kategori = (row['kategori']||'laptop').toString().trim().toLowerCase();
+        const spec = (row['spesifikasi']||row['spec']||'').toString().trim();
 
-        if(isNaN(id)) return {status:'err', errMsg:'ID tidak valid', raw:row};
+        // PRODUK BARU (tidak ada ID)
+        if(!id || isNaN(id)){
+          if(!brand || !nama){ return {status:'err', errMsg:'Brand dan Nama wajib diisi untuk produk baru', raw:row}; }
+          if(isNaN(newStok) || newStok < 0){ return {status:'err', errMsg:'Stok tidak valid', raw:row}; }
+          if(!newHarga || isNaN(newHarga) || newHarga <= 0){ return {status:'err', errMsg:'Harga wajib diisi untuk produk baru', raw:row}; }
+          return {status:'new', brand, nama, kategori, spec, newStok, newHarga};
+        }
 
+        // PRODUK LAMA (ada ID = update)
         const p = products.find(x=>x.id===id);
         if(!p) return {status:'err', id, errMsg:`ID ${id} tidak ditemukan di sistem`, raw:row};
-
-        if(isNaN(newStok) || newStok < 0)
-          return {status:'err', id, product:p, errMsg:'Nilai stok tidak valid (harus angka ≥ 0)', raw:row};
+        if(isNaN(newStok) || newStok < 0) return {status:'err', id, product:p, errMsg:'Nilai stok tidak valid', raw:row};
 
         const stokChanged = newStok !== p.stok;
         const hargaValid = newHarga !== null && !isNaN(newHarga) && newHarga > 0;
@@ -845,10 +852,12 @@ function processExcelFile(file){
 
 function renderExcelPreview(){
   const countOk   = excelRows.filter(r=>r.status==='ok').length;
+  const countNew  = excelRows.filter(r=>r.status==='new').length;
   const countSame = excelRows.filter(r=>r.status==='same').length;
   const countErr  = excelRows.filter(r=>r.status==='err').length;
 
   document.getElementById('excelSummary').innerHTML = `
+    ${countNew ? `<span style="color:var(--accent2)">✨ <strong>${countNew}</strong> produk baru</span>` : ''}
     <span style="color:var(--green)">✅ <strong>${countOk}</strong> akan diubah</span>
     <span style="color:var(--text3)">⬜ <strong>${countSame}</strong> tidak berubah</span>
     ${countErr ? `<span style="color:var(--red)">❌ <strong>${countErr}</strong> error</span>` : ''}
@@ -856,29 +865,36 @@ function renderExcelPreview(){
   `;
 
   const btn = document.getElementById('btnApplyExcel');
-  btn.disabled = countOk === 0;
-  btn.style.opacity = countOk === 0 ? '0.45' : '1';
+  btn.disabled = (countOk + countNew) === 0;
+  btn.style.opacity = (countOk + countNew) === 0 ? '0.45' : '1';
 
   document.getElementById('excelPreviewBody').innerHTML = excelRows.map(r=>{
     if(r.status==='err'){
       return `<tr class="row-err">
         <td style="color:var(--text3)">${r.id||'—'}</td>
-        <td>${r.product ? r.product.brand+' '+r.product.nama : '—'}</td>
+        <td>${r.product ? r.product.brand+' '+r.product.nama : (r.brand&&r.nama?r.brand+' '+r.nama:'—')}</td>
         <td>—</td>
         <td colspan="2" style="color:var(--red);font-size:12px">⚠️ ${r.errMsg}</td>
         <td><span class="badge-change err">Error</span></td>
       </tr>`;
     }
+    if(r.status==='new'){
+      return `<tr class="row-ok">
+        <td style="color:var(--accent2)">Baru</td>
+        <td><strong>${r.brand}</strong> ${r.nama}</td>
+        <td style="color:var(--text3)">${r.kategori}</td>
+        <td style="color:var(--green);font-weight:700">${r.newStok}</td>
+        <td style="color:var(--green);font-size:12px;font-weight:700">${formatRp(r.newHarga)}</td>
+        <td><span class="badge-change ok">+ Baru</span></td>
+      </tr>`;
+    }
     const p = r.product;
-
     const stokCell = r.stokChanged
       ? `<span class="val-change"><span class="val-old">${r.oldStok}</span><span class="val-arrow">→</span><span class="${r.newStok>r.oldStok?'val-new-up':'val-new-dn'}">${r.newStok}</span></span>`
       : `<span style="color:var(--text3)">${r.newStok}</span>`;
-
     const hargaCell = r.hargaChanged
       ? `<span class="val-change"><span class="val-old" style="font-size:11px">${formatRp(r.oldHarga)}</span><span class="val-arrow">→</span><span class="${r.newHarga>r.oldHarga?'val-new-up':'val-new-dn'}" style="font-size:12px">${formatRp(r.newHarga)}</span></span>`
       : `<span style="color:var(--text3);font-size:12px">${formatRp(r.oldHarga)}</span>`;
-
     return `<tr class="${r.status==='ok'?'row-ok':'row-same'}">
       <td style="color:var(--text3)">${p.id}</td>
       <td><strong>${p.brand}</strong> ${p.nama}</td>
@@ -895,19 +911,28 @@ function renderExcelPreview(){
 
 function applyExcelChanges(){
   const toApply = excelRows.filter(r=>r.status==='ok');
-  if(!toApply.length){ showToast('Tidak ada perubahan untuk diterapkan.'); return; }
-  let n=0;
+  const toAdd = excelRows.filter(r=>r.status==='new');
+  if(!toApply.length && !toAdd.length){ showToast('Tidak ada perubahan untuk diterapkan.'); return; }
+  
+  // Update produk lama
   for(const r of toApply){
     const idx = products.findIndex(p=>p.id===r.id);
     if(idx===-1) continue;
     products[idx].stok = r.newStok;
     if(r.hargaChanged) products[idx].harga = r.newHarga;
-    n++;
   }
+  
+  // Tambah produk baru
+  for(const r of toAdd){
+    const kat = r.kategori;
+    const icon = kat==='laptop'?'💻':kat==='handphone'?'📱':'🎧';
+    products.push({id:nextId++, kategori:kat, icon, brand:r.brand, nama:r.nama, spec:r.spec, harga:r.newHarga, stok:r.newStok, img:null});
+  }
+
   saveProducts(); render(); renderAdminList();
   cancelExcelPreview();
   switchAdminTab('list', document.getElementById('tabBtnList'));
-  showToast(`✅ ${n} produk berhasil diupdate dari Excel!`);
+  showToast(`✅ ${toApply.length} diupdate + ${toAdd.length} produk baru ditambahkan!`);
 }
 
 function cancelExcelPreview(){
