@@ -18,7 +18,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 header{background:rgba(10,10,15,0.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;padding:0 24px;}
 .header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;gap:16px;}
 .logo{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;}
-.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block;}
 .header-actions{display:flex;align-items:center;gap:10px;}
 .btn-admin{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
 .btn-admin:hover{border-color:var(--accent);color:var(--accent);}
@@ -26,8 +25,18 @@ header{background:rgba(10,10,15,0.96);backdrop-filter:blur(12px);border-bottom:1
 .search-wrap input{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 16px 8px 38px;border-radius:8px;font-size:14px;width:220px;outline:none;transition:border-color .2s;}
 .search-wrap input:focus{border-color:var(--accent);}
 .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;font-size:15px;}
-.hero{background:linear-gradient(135deg,#0a0a0f 0%,#12101f 50%,#0a0f1a 100%);padding:60px 24px;text-align:center;position:relative;overflow:hidden;}
-.hero::before{content:'';position:absolute;top:-50%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(108,99,255,0.12) 0%,transparent 70%);pointer-events:none;}
+.hero{padding:60px 24px;text-align:center;position:relative;overflow:hidden;min-height:280px;display:flex;flex-direction:column;justify-content:center;align-items:center;}
+/* SLIDESHOW */
+.hero-bg{position:absolute;inset:0;z-index:0;}
+.hero-bg-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease-in-out;}
+.hero-bg-slide.active{opacity:1;}
+.hero-bg-fallback{position:absolute;inset:0;background:linear-gradient(135deg,#0a0a0f 0%,#12101f 50%,#0a0f1a 100%);}
+.hero-bg-fallback::before{content:'';position:absolute;top:-50%;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(108,99,255,0.12) 0%,transparent 70%);pointer-events:none;}
+.hero-bg-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,10,15,0.80) 0%,rgba(18,16,31,0.72) 50%,rgba(10,15,26,0.80) 100%);}
+.hero-content{position:relative;z-index:1;width:100%;}
+.hero-dots{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:2;}
+.hero-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;transition:background .3s,transform .3s;}
+.hero-dot.active{background:var(--accent2);transform:scale(1.3);}
 .hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,5vw,52px);font-weight:700;line-height:1.1;margin-bottom:16px;background:linear-gradient(135deg,#fff 30%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .hero p{color:var(--text2);font-size:16px;max-width:480px;margin:0 auto 32px;}
 .hero-stats{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;}
@@ -110,8 +119,6 @@ header{background:rgba(10,10,15,0.96);backdrop-filter:blur(12px);border-bottom:1
 .wa-config-title{font-size:14px;font-weight:600;color:var(--green);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
 .alert-err{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:var(--red);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
 .alert-ok{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:var(--green);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none;}
-
-/* ===== EXCEL SECTION ===== */
 .excel-box{border-radius:12px;padding:18px;margin-bottom:18px;}
 .excel-box.green{background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.2);}
 .excel-box.purple{background:rgba(108,99,255,0.05);border:1px solid rgba(108,99,255,0.2);}
@@ -155,16 +162,6 @@ header{background:rgba(10,10,15,0.96);backdrop-filter:blur(12px);border-bottom:1
 .val-new-up{color:var(--green);font-weight:700;}
 .val-new-dn{color:var(--red);font-weight:700;}
 .preview-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
-
-/* ===== HERO SLIDESHOW ===== */
-.hero-bg{position:absolute;inset:0;z-index:0;}
-.hero-bg-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease-in-out;}
-.hero-bg-slide.active{opacity:1;}
-.hero-bg-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,10,15,0.82) 0%,rgba(18,16,31,0.75) 50%,rgba(10,15,26,0.82) 100%);}
-.hero-content{position:relative;z-index:1;}
-.hero-dots{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:7px;z-index:2;}
-.hero-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;transition:background .3s,transform .3s;}
-.hero-dot.active{background:var(--accent2);transform:scale(1.3);}
 footer{border-top:1px solid var(--border);padding:32px 24px;text-align:center;color:var(--text3);font-size:13px;margin-top:60px;}
 footer strong{color:var(--text2);}
 @media(max-width:600px){
@@ -183,9 +180,9 @@ footer strong{color:var(--text2);}
 <header>
   <div class="header-inner">
     <a class="logo" href="#">
-  <img src="/logo.png" alt="Logo" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">
-  AGRES ID CILEUNGSI
-</a>
+      <img src="/logo.png" alt="Logo" style="width:32px;height:32px;border-radius:8px;object-fit:cover;">
+      AGRES ID CILEUNGSI
+    </a>
     <div class="header-actions">
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
@@ -198,6 +195,7 @@ footer strong{color:var(--text2);}
 
 <section class="hero" id="heroSection">
   <div class="hero-bg" id="heroBg">
+    <div class="hero-bg-fallback"></div>
     <div class="hero-bg-overlay"></div>
   </div>
   <div class="hero-content">
@@ -285,24 +283,18 @@ footer strong{color:var(--text2);}
         <button class="modal-close" onclick="closeAdmin()">✕</button>
       </div>
     </div>
-
     <div class="wa-config">
       <div class="wa-config-title">📱 Nomor WhatsApp Toko</div>
       <input class="form-input" id="waNumber" placeholder="6281234567890" type="tel">
       <small style="color:var(--text3);font-size:12px;margin-top:6px;display:block">Format: kode negara + nomor. Contoh: 6281234567890</small>
       <button class="btn-primary" style="margin-top:12px;width:auto;padding:8px 20px;font-size:13px" onclick="saveWA()">Simpan Nomor</button>
     </div>
-
     <div class="admin-tabs">
       <button class="admin-tab active" id="tabBtnList" onclick="switchAdminTab('list',this)">📦 Daftar Produk</button>
       <button class="admin-tab" id="tabBtnAdd" onclick="switchAdminTab('add',this)">➕ Tambah / Edit</button>
       <button class="admin-tab" id="tabBtnExcel" onclick="switchAdminTab('excel',this)">📊 Import Excel</button>
     </div>
-
-    <!-- TAB LIST -->
     <div id="adminTabList"><div id="adminProductList"></div></div>
-
-    <!-- TAB ADD/EDIT -->
     <div id="adminTabAdd" style="display:none">
       <div class="form-group">
         <label class="form-label">Foto Produk</label>
@@ -346,10 +338,7 @@ footer strong{color:var(--text2);}
       <input type="hidden" id="editId">
       <button class="btn-primary" onclick="simpanProduk()" id="btnSimpanProduk">Simpan Produk</button>
     </div>
-
-    <!-- TAB EXCEL -->
     <div id="adminTabExcel" style="display:none">
-      <!-- STEP 1: DOWNLOAD TEMPLATE -->
       <div class="excel-box green">
         <div class="excel-box-title green">📥 Langkah 1 — Download Template</div>
         <div class="excel-box-desc">Download file Excel dengan data produk saat ini. Edit kolom <strong style="color:#fff">Stok</strong> (dan opsional <strong style="color:#fff">Harga</strong>), lalu upload kembali di bawah.</div>
@@ -360,11 +349,9 @@ footer strong{color:var(--text2);}
           💡 Pencocokan berdasarkan <code>ID</code>. Hanya <code>Stok</code> dan <code>Harga</code> yang akan diperbarui. Kolom lain diabaikan.
         </div>
       </div>
-
-      <!-- STEP 2: UPLOAD -->
       <div class="excel-box purple">
         <div class="excel-box-title purple">📤 Langkah 2 — Upload File Excel</div>
-        <div class="excel-box-desc">Upload file <code style="background:rgba(108,99,255,0.2);color:var(--accent2);padding:1px 5px;border-radius:3px">.xlsx</code> atau <code style="background:rgba(108,99,255,0.2);color:var(--accent2);padding:1px 5px;border-radius:3px">.xls</code> yang sudah diedit. Preview perubahan akan muncul sebelum diterapkan.</div>
+        <div class="excel-box-desc">Upload file <code style="background:rgba(108,99,255,0.2);color:var(--accent2);padding:1px 5px;border-radius:3px">.xlsx</code> atau <code style="background:rgba(108,99,255,0.2);color:var(--accent2);padding:1px 5px;border-radius:3px">.xls</code> yang sudah diedit.</div>
         <div class="drop-zone" id="excelDropZone">
           <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" onchange="handleExcelUpload(event)">
           <div class="drop-zone-icon">📊</div>
@@ -372,8 +359,6 @@ footer strong{color:var(--text2);}
           <div class="drop-zone-sub">.xlsx · .xls · .csv — maks 5MB</div>
         </div>
       </div>
-
-      <!-- PREVIEW RESULTS -->
       <div id="excelPreviewSection" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
           <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700">🔍 Preview Perubahan</div>
@@ -385,16 +370,7 @@ footer strong{color:var(--text2);}
         <div id="excelSummary" class="preview-summary"></div>
         <div class="preview-wrap">
           <table class="preview-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Produk</th>
-                <th>Kat.</th>
-                <th>Stok</th>
-                <th>Harga</th>
-                <th>Status</th>
-              </tr>
-            </thead>
+            <thead><tr><th>ID</th><th>Produk</th><th>Kat.</th><th>Stok</th><th>Harga</th><th>Status</th></tr></thead>
             <tbody id="excelPreviewBody"></tbody>
           </table>
         </div>
@@ -403,8 +379,7 @@ footer strong{color:var(--text2);}
           <button class="btn-cancel2" onclick="cancelExcelPreview()">✕ Batal</button>
         </div>
       </div>
-
-    </div><!-- /adminTabExcel -->
+    </div>
   </div>
 </div>
 
@@ -434,7 +409,6 @@ async function dbGetConfig(){
   return d[0] ? {wa: d[0].value} : {wa:'6281322569903'};
 }
 async function dbSaveProducts(products){
-  // Delete all then insert
   await fetch(SUPA_URL+'/rest/v1/products?id=gte.0',{method:'DELETE',headers:HEADERS});
   if(!products.length) return;
   const r = await fetch(SUPA_URL+'/rest/v1/products',{
@@ -449,17 +423,13 @@ async function dbSaveProducts(products){
   return r;
 }
 async function dbSaveConfig(wa){
-  await fetch(SUPA_URL+'/rest/v1/config?key=eq.wa',{
-    method:'DELETE',headers:HEADERS
-  });
+  await fetch(SUPA_URL+'/rest/v1/config?key=eq.wa',{method:'DELETE',headers:HEADERS});
   await fetch(SUPA_URL+'/rest/v1/config',{
     method:'POST',
     headers:{...HEADERS,'Prefer':'return=minimal'},
     body: JSON.stringify({key:'wa',value:wa})
   });
 }
-
-document.addEventListener('DOMContentLoaded', loadData);
 
 let isLoggedIn = false;
 let activeFilter = 'semua';
@@ -483,13 +453,8 @@ function stokInfo(stok){
 function getCreds(){
   return JSON.parse(localStorage.getItem('ts_creds')) || creds;
 }
-
-async function saveProducts(){
-  await dbSaveProducts(products);
-}
-async function saveConfig(){
-  await dbSaveConfig(config.wa);
-}
+async function saveProducts(){ await dbSaveProducts(products); }
+async function saveConfig(){ await dbSaveConfig(config.wa); }
 
 function render(){
   const filtered = products.filter(p=>{
@@ -597,7 +562,6 @@ function doChangePassword(){
   ok.textContent='✅ Password berhasil diubah!'; ok.style.display='block';
   setTimeout(()=>document.getElementById('changePwModal').classList.remove('open'),1500);
 }
-
 function closeAdmin(){ document.getElementById('adminModal').classList.remove('open'); resetForm(); cancelExcelPreview(); }
 document.getElementById('adminModal').addEventListener('click',function(e){ if(e.target===this)closeAdmin(); });
 async function saveWA(){
@@ -636,7 +600,6 @@ function renderAdminList(){
     </div>`;
   }).join('');
 }
-
 async function handleImageUpload(e){
   const file=e.target.files[0]; if(!file) return;
   if(file.size>10*1024*1024){ alert('Ukuran foto maksimal 10MB!'); e.target.value=''; return; }
@@ -670,7 +633,6 @@ function removeImage(){
   document.getElementById('imgUploadArea').classList.remove('has-image');
   document.getElementById('imgActions').style.display='none';
 }
-
 function editStok(id){
   const p=products.find(x=>x.id===id); if(!p) return;
   document.getElementById('stokModalContent').innerHTML=`
@@ -695,7 +657,6 @@ async function simpanStok(id){
   await saveProducts(); render(); renderAdminList(); closeStokModal();
   showToast('✅ Stok berhasil diupdate!');
 }
-
 function editProduk(id){
   resetForm();
   const p=products.find(x=>x.id===id); if(!p) return;
@@ -766,7 +727,6 @@ dropZone.addEventListener('drop',e=>{
   if(file) processExcelFile(file);
 });
 function handleExcelUpload(e){ const file=e.target.files[0]; if(file) processExcelFile(file); e.target.value=''; }
-
 function processExcelFile(file){
   if(file.size>5*1024*1024){ showToast('❌ File terlalu besar (maks 5MB)'); return; }
   if(!/\.(xlsx|xls|csv)$/i.test(file.name)){ showToast('❌ Format tidak didukung'); return; }
@@ -808,7 +768,6 @@ function processExcelFile(file){
   };
   reader.readAsArrayBuffer(file);
 }
-
 function renderExcelPreview(){
   const countOk=excelRows.filter(r=>r.status==='ok').length;
   const countNew=excelRows.filter(r=>r.status==='new').length;
@@ -834,7 +793,6 @@ function renderExcelPreview(){
   document.getElementById('excelPreviewSection').style.display='block';
   document.getElementById('excelPreviewSection').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-
 async function applyExcelChanges(){
   const toApply=excelRows.filter(r=>r.status==='ok');
   const toAdd=excelRows.filter(r=>r.status==='new');
@@ -857,7 +815,6 @@ async function applyExcelChanges(){
   switchAdminTab('list',document.getElementById('tabBtnList'));
   showToast(`✅ ${toApply.length} diupdate + ${toAdd.length} produk baru!`);
 }
-
 function cancelExcelPreview(){
   excelRows=[];
   document.getElementById('excelPreviewSection').style.display='none';
@@ -873,45 +830,26 @@ function showToast(msg){
     t.style.cssText='position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:#1e1e2e;border:1px solid var(--border);color:var(--text);padding:10px 22px;border-radius:100px;font-size:14px;font-weight:500;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.4);transition:opacity .3s;pointer-events:none;';
     document.body.appendChild(t);
   }
-  t.textContent=msg;t.style.opacity='1';
+  t.textContent=msg; t.style.opacity='1';
   clearTimeout(t._timer);
   t._timer=setTimeout(()=>{t.style.opacity='0';},2800);
 }
 
 // ===== HERO SLIDESHOW =====
-async function loadHeroBanners(){
-  try{
-    const r = await fetch(`${SUPA_URL}/storage/v1/object/list/banner`,{
-      method:'POST',
-      headers:{...HEADERS,'Content-Type':'application/json'},
-      body: JSON.stringify({limit:20, offset:0, prefix:''})
-    });
-    const files = await r.json();
-    if(!Array.isArray(files)||!files.length) return;
-    const imgs = files
-      .filter(f=>f.name&&/\.(jpg|jpeg|png|webp|gif)$/i.test(f.name))
-      .map(f=>`${SUPA_URL}/storage/v1/object/public/banner/${f.name}`);
-    if(!imgs.length) return;
-    initSlideshow(imgs);
-  } catch(e){ console.error('Banner error:',e); }
-}
-
 function initSlideshow(imgs){
   const bg = document.getElementById('heroBg');
   const dotsEl = document.getElementById('heroDots');
   const overlay = bg.querySelector('.hero-bg-overlay');
   let current = 0;
 
-  // Buat slides
   const slides = imgs.map((src,i)=>{
     const div = document.createElement('div');
     div.className = 'hero-bg-slide' + (i===0?' active':'');
-    div.style.backgroundImage = `url('${src}')`;
+    div.style.backgroundImage = "url('" + src + "')";
     bg.insertBefore(div, overlay);
     return div;
   });
 
-  // Buat dots
   if(imgs.length>1){
     imgs.forEach((_,i)=>{
       const dot = document.createElement('div');
@@ -923,10 +861,10 @@ function initSlideshow(imgs){
 
   function goTo(idx){
     slides[current].classList.remove('active');
-    dotsEl.children[current]?.classList.remove('active');
+    if(dotsEl.children[current]) dotsEl.children[current].classList.remove('active');
     current = idx;
     slides[current].classList.add('active');
-    dotsEl.children[current]?.classList.add('active');
+    if(dotsEl.children[current]) dotsEl.children[current].classList.add('active');
   }
 
   if(imgs.length>1){
@@ -934,7 +872,29 @@ function initSlideshow(imgs){
   }
 }
 
-loadHeroBanners();
+async function loadHeroBanners(){
+  try{
+    const r = await fetch(SUPA_URL+'/storage/v1/object/list/banner',{
+      method:'POST',
+      headers:HEADERS,
+      body: JSON.stringify({limit:20, offset:0, prefix:''})
+    });
+    const files = await r.json();
+    if(!Array.isArray(files)||!files.length) return;
+    const imgs = files
+      .filter(f=>f.name&&/\.(jpg|jpeg|png|webp|gif)$/i.test(f.name))
+      .map(f=>SUPA_URL+'/storage/v1/object/public/banner/'+f.name);
+    if(!imgs.length) return;
+    initSlideshow(imgs);
+  } catch(e){ console.error('Banner error:',e); }
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', function(){
+  loadData();
+  loadHeroBanners();
+});
+
 async function loadData(){
   if(isLoaded) return;
   isLoaded=true;
@@ -951,7 +911,6 @@ async function loadData(){
     showToast('❌ Gagal load data');
   }
 }
-
 </script>
 </body>
 </html>
