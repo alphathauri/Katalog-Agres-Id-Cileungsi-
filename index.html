@@ -193,143 +193,22 @@ footer strong{color:var(--text2);}
   </div>
 </header>
 
-<!-- CSS Slideshow -->
-<style>
-  .agres-slideshow { background: #0d1117; border-radius: 12px; overflow: hidden; font-family: sans-serif; }
-  .agres-progress-bar { height: 3px; background: rgba(255,255,255,0.08); }
-  .agres-progress-fill { height: 3px; background: #7c6ee0; width: 0%; }
-  .agres-slide { display: none; padding: 2.5rem 2rem; min-height: 320px; align-items: center; justify-content: center; flex-direction: column; text-align: center; }
-  .agres-slide.active { display: flex; }
-  .agres-slide-icon { font-size: 48px; margin-bottom: 1rem; }
-  .agres-badge { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-bottom: 1rem; display: inline-block; letter-spacing: 0.05em; text-transform: uppercase; }
-  .agres-title { font-size: 28px; font-weight: 600; color: #ffffff; margin: 0 0 0.75rem; line-height: 1.3; }
-  .agres-sub { font-size: 14px; color: #8b9ab0; margin: 0 0 1.5rem; line-height: 1.6; max-width: 420px; }
-  .agres-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; }
-  .agres-stats { display: flex; gap: 2rem; justify-content: center; margin-top: 1.5rem; }
-  .agres-stat-num { font-size: 22px; font-weight: 600; color: #7c6ee0; }
-  .agres-stat-label { font-size: 11px; color: #8b9ab0; margin-top: 2px; }
-  .agres-controls { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 1rem; background: #0d1117; }
-  .agres-dot { width: 8px; height: 8px; border-radius: 50%; background: #334155; border: none; cursor: pointer; padding: 0; transition: background 0.3s, width 0.3s; }
-  .agres-dot.active { background: #7c6ee0; width: 24px; border-radius: 4px; }
-  .agres-nav { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; color: #fff; width: 30px; height: 30px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
-  .agres-nav:hover { background: rgba(255,255,255,0.16); }
-</style>
-
-<!-- HTML Slideshow -->
-<div class="agres-slideshow">
-  <div class="agres-progress-bar">
-    <div class="agres-progress-fill" id="agres-progress"></div>
+<section class="hero" id="heroSection">
+  <div class="hero-bg" id="heroBg">
+    <div class="hero-bg-fallback"></div>
+    <div class="hero-bg-overlay"></div>
   </div>
-
-  <!-- Slide 1: Laptop -->
-  <div class="agres-slide active" id="agres-slide-0">
-    <div class="agres-slide-icon">💻</div>
-    <span class="agres-badge" style="background:#1e1a4a; color:#a89df4;">Laptop</span>
-    <h2 class="agres-title">Laptop Terbaik<br>Harga Terjangkau</h2>
-    <p class="agres-sub">Temukan laptop pilihan dari brand ternama. Gaming, kerja, atau pelajar — semua ada di sini.</p>
-    <a href="#produk" class="agres-btn" style="background:#7c6ee0; color:#fff;">Lihat Koleksi Laptop →</a>
-    <div class="agres-stats">
-      <div class="agres-stat">
-        <div class="agres-stat-num">574</div>
-        <div class="agres-stat-label">Produk Tersedia</div>
-      </div>
-      <div class="agres-stat">
-        <div class="agres-stat-num">3</div>
-        <div class="agres-stat-label">Kategori</div>
-      </div>
-      <div class="agres-stat">
-        <div class="agres-stat-num" style="color:#f59e0b;">⚡</div>
-        <div class="agres-stat-label">Fast Response WA</div>
-      </div>
+  <div class="hero-content">
+    <h1>Gadget Terbaik<br>Harga Terbaik</h1>
+    <p>Laptop, handphone, dan aksesoris pilihan. Garansi resmi, pengiriman cepat ke seluruh Indonesia.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num" id="statProduk">0</div><div class="stat-label">Produk Tersedia</div></div>
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">Kategori</div></div>
+      <div class="stat"><div class="stat-num">⚡</div><div class="stat-label">Fast Response WA</div></div>
     </div>
   </div>
-
-  <!-- Slide 2: Handphone -->
-  <div class="agres-slide" id="agres-slide-1">
-    <div class="agres-slide-icon">📱</div>
-    <span class="agres-badge" style="background:#0c2233; color:#7dd3f8;">Handphone</span>
-    <h2 class="agres-title">Smartphone Terkini<br>Garansi Resmi</h2>
-    <p class="agres-sub">HP flagship hingga mid-range pilihan. Garansi resmi distributor, pengiriman cepat ke seluruh Indonesia.</p>
-    <a href="#produk" class="agres-btn" style="background:#0ea5e9; color:#fff;">Jelajahi Handphone →</a>
-  </div>
-
-  <!-- Slide 3: Aksesoris -->
-  <div class="agres-slide" id="agres-slide-2">
-    <div class="agres-slide-icon">🎧</div>
-    <span class="agres-badge" style="background:#0a2e1f; color:#6ee7b7;">Aksesoris</span>
-    <h2 class="agres-title">Aksesoris Lengkap<br>untuk Semua Gadget</h2>
-    <p class="agres-sub">Headphone, charger, case, dan ratusan aksesoris pilihan. Kualitas terjamin dengan harga kompetitif.</p>
-    <a href="#produk" class="agres-btn" style="background:#10b981; color:#fff;">Belanja Aksesoris →</a>
-  </div>
-
-  <!-- Slide 4: Pengiriman -->
-  <div class="agres-slide" id="agres-slide-3">
-    <div class="agres-slide-icon">🚚</div>
-    <span class="agres-badge" style="background:#2d1f05; color:#fcd34d;">Pengiriman</span>
-    <h2 class="agres-title">Pengiriman Cepat<br>ke Seluruh Indonesia</h2>
-    <p class="agres-sub">Order sekarang, proses hari ini. Kami melayani pengiriman ke seluruh Indonesia dengan aman dan terpercaya.</p>
-    <a href="#kontak" class="agres-btn" style="background:#f59e0b; color:#1a1a1a;">Cara Order →</a>
-  </div>
-
-  <!-- Navigasi -->
-  <div class="agres-controls">
-    <button class="agres-nav" id="agres-prev">&#8249;</button>
-    <button class="agres-dot active" id="agres-dot-0"></button>
-    <button class="agres-dot" id="agres-dot-1"></button>
-    <button class="agres-dot" id="agres-dot-2"></button>
-    <button class="agres-dot" id="agres-dot-3"></button>
-    <button class="agres-nav" id="agres-next">&#8250;</button>
-  </div>
-</div>
-
-<!-- JavaScript Slideshow -->
-<script>
-  (function() {
-    var TOTAL = 4;
-    var DURATION = 4000;
-    var current = 0;
-    var startTime = null;
-    var rafId = null;
-    var progress = document.getElementById('agres-progress');
-
-    function showSlide(n) {
-      document.getElementById('agres-slide-' + current).classList.remove('active');
-      document.getElementById('agres-dot-' + current).classList.remove('active');
-      current = ((n % TOTAL) + TOTAL) % TOTAL;
-      document.getElementById('agres-slide-' + current).classList.add('active');
-      document.getElementById('agres-dot-' + current).classList.add('active');
-      resetTimer();
-    }
-
-    function resetTimer() {
-      cancelAnimationFrame(rafId);
-      progress.style.width = '0%';
-      startTime = performance.now();
-      rafId = requestAnimationFrame(tick);
-    }
-
-    function tick(now) {
-      var elapsed = now - startTime;
-      var pct = Math.min((elapsed / DURATION) * 100, 100);
-      progress.style.width = pct + '%';
-      if (elapsed < DURATION) {
-        rafId = requestAnimationFrame(tick);
-      } else {
-        showSlide(current + 1);
-      }
-    }
-
-    document.getElementById('agres-prev').onclick = function() { showSlide(current - 1); };
-    document.getElementById('agres-next').onclick = function() { showSlide(current + 1); };
-    for (var i = 0; i < TOTAL; i++) {
-      (function(idx) {
-        document.getElementById('agres-dot-' + idx).onclick = function() { showSlide(idx); };
-      })(i);
-    }
-
-    resetTimer();
-  })();
-</script>
+  <div class="hero-dots" id="heroDots"></div>
+</section>
 
 <div class="filter-bar">
   <button class="tab active" onclick="filterKategori('semua',this)">Semua</button>
@@ -584,8 +463,7 @@ function render(){
     const ms = !q || (p.nama||'').toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q) || (p.spec||'').toLowerCase().includes(q);
     return mk && ms;
   });
-  const statEl = document.getElementById('statProduk');
-if (statEl) statEl.textContent = products.filter(p=>p.stok>0).length;
+  document.getElementById('statProduk').textContent = products.filter(p=>p.stok>0).length;
   const grid = document.getElementById('productGrid');
   const empty = document.getElementById('emptyState');
   if(!filtered.length){ grid.innerHTML=''; empty.style.display='block'; return; }
@@ -997,10 +875,10 @@ function initSlideshow(imgs){
 async function loadHeroBanners(){
   try{
     const r = await fetch(SUPA_URL+'/storage/v1/object/list/banner',{
-      method:'POST',
-      headers:HEADERS,
-      body: JSON.stringify({limit:20, offset:0, prefix:''})
-    });
+  method:'POST',
+  headers:{...HEADERS,'Content-Type':'application/json'},
+  body: JSON.stringify({limit:20, offset:0, prefix:''})
+});
     const files = await r.json();
     if(!Array.isArray(files)||!files.length) return;
     const imgs = files
