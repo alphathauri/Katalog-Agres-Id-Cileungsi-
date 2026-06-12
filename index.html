@@ -25,8 +25,7 @@ header{background:rgba(10,10,15,0.96);backdrop-filter:blur(12px);border-bottom:1
 .search-wrap input{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:8px 16px 8px 38px;border-radius:8px;font-size:14px;width:220px;outline:none;transition:border-color .2s;}
 .search-wrap input:focus{border-color:var(--accent);}
 .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;font-size:15px;}
-.hero{padding:60px 24px;text-align:center;position:relative;overflow:hidden;min-height:280px;display:flex;flex-direction:column;justify-content:center;align-items:center;}
-/* SLIDESHOW */
+.hero{padding:60px 24px;text-align:center;position:relative;overflow:hidden;min-height:380px;display:flex;flex-direction:column;justify-content:center;align-items:center;}
 .hero-bg{position:absolute;inset:0;z-index:0;}
 .hero-bg-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease-in-out;}
 .hero-bg-slide.active{opacity:1;}
@@ -251,7 +250,7 @@ footer strong{color:var(--text2);}
       </div>
     </div>
     <button class="btn-primary" onclick="doLogin()">Masuk</button>
-    <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--text3)"> adit ganteng </p>
+    <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--text3)">adit ganteng</p>
   </div>
 </div>
 
@@ -302,7 +301,7 @@ footer strong{color:var(--text2);}
           <div id="imgPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:6px">
             <span class="img-upload-icon">🖼️</span>
             <span class="img-upload-label">Klik untuk upload foto</span>
-            <span style="font-size:11px;color:var(--text3)">JPG, PNG, WEBP — maks 2MB</span>
+            <span style="font-size:11px;color:var(--text3)">JPG, PNG, WEBP — maks 10MB</span>
           </div>
           <img id="imgPreview" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;">
           <div class="img-upload-overlay" id="imgOverlay"><span>🔄 Ganti Foto</span></div>
@@ -408,19 +407,18 @@ async function dbGetConfig(){
   const d = await r.json();
   return d[0] ? {wa: d[0].value} : {wa:'6281322569903'};
 }
-async function dbSaveProducts(products){
+async function dbSaveProducts(prods){
   await fetch(SUPA_URL+'/rest/v1/products?id=gte.0',{method:'DELETE',headers:HEADERS});
-  if(!products.length) return;
-  const r = await fetch(SUPA_URL+'/rest/v1/products',{
+  if(!prods.length) return;
+  return await fetch(SUPA_URL+'/rest/v1/products',{
     method:'POST',
     headers:{...HEADERS,'Prefer':'return=minimal'},
-    body: JSON.stringify(products.map(p=>({
+    body: JSON.stringify(prods.map(p=>({
       id:p.id, kategori:p.kategori||'laptop', icon:p.icon||'💻',
       brand:p.brand, nama:p.nama, spec:p.spec||'',
       harga:p.harga, stok:p.stok, img:p.img||null
     })))
   });
-  return r;
 }
 async function dbSaveConfig(wa){
   await fetch(SUPA_URL+'/rest/v1/config?key=eq.wa',{method:'DELETE',headers:HEADERS});
@@ -436,9 +434,9 @@ let activeFilter = 'semua';
 let searchQuery = '';
 let currentImageBase64 = null;
 let excelRows = [];
-let config = {wa:"6281322569903"};
+let config = {wa:'6281322569903'};
 let products = [];
-let creds = {user:"admin",pass:"admin123"};
+let creds = {user:'admin',pass:'admin123'};
 let isLoaded = false;
 let nextId = 1;
 
@@ -463,31 +461,23 @@ function render(){
     const ms = !q || (p.nama||'').toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q) || (p.spec||'').toLowerCase().includes(q);
     return mk && ms;
   });
-  document.getElementById('statProduk').textContent = products.filter(p=>p.stok>0).length;
+  const statEl = document.getElementById('statProduk');
+  if(statEl) statEl.textContent = products.filter(p=>p.stok>0).length;
   const grid = document.getElementById('productGrid');
   const empty = document.getElementById('emptyState');
   if(!filtered.length){ grid.innerHTML=''; empty.style.display='block'; return; }
   empty.style.display='none';
   grid.innerHTML = filtered.map(p=>{
     const si = stokInfo(p.stok);
-    const waMsg = encodeURIComponent(`Halo, saya tertarik dengan *${p.brand} ${p.nama}* (${formatRp(p.harga)}). Apakah masih tersedia?`);
-    const waUrl = `https://wa.me/${config.wa}?text=${waMsg}`;
+    const waMsg = encodeURIComponent('Halo, saya tertarik dengan *'+p.brand+' '+p.nama+'* ('+formatRp(p.harga)+'). Apakah masih tersedia?');
+    const waUrl = 'https://wa.me/'+config.wa+'?text='+waMsg;
     const btn = p.stok===0
-      ? `<span class="btn-wa disabled">❌ Stok Habis</span>`
-      : `<a class="btn-wa" href="${waUrl}" target="_blank">💬 Hubungi via WhatsApp</a>`;
+      ? '<span class="btn-wa disabled">❌ Stok Habis</span>'
+      : '<a class="btn-wa" href="'+waUrl+'" target="_blank">💬 Hubungi via WhatsApp</a>';
     const imgArea = p.img
-      ? `<img src="${p.img}" alt="${p.nama}" style="width:100%;height:100%;object-fit:cover;display:block;">`
-      : `<span>${p.icon||'📦'}</span>`;
-    return `<div class="card">
-      <div class="card-img">${imgArea}<span class="badge-cat">${p.kategori}</span><span class="badge-stok ${si.cls}">${si.label}</span></div>
-      <div class="card-body">
-        <div class="card-brand">${p.brand}</div>
-        <div class="card-name">${p.nama}</div>
-        <div class="card-spec">${p.spec||''}</div>
-        <div class="card-price">${formatRp(p.harga)} <small>/ unit</small></div>
-        ${btn}
-      </div>
-    </div>`;
+      ? '<img src="'+p.img+'" alt="'+p.nama+'" style="width:100%;height:100%;object-fit:cover;display:block;">'
+      : '<span>'+(p.icon||'📦')+'</span>';
+    return '<div class="card"><div class="card-img">'+imgArea+'<span class="badge-cat">'+p.kategori+'</span><span class="badge-stok '+si.cls+'">'+si.label+'</span></div><div class="card-body"><div class="card-brand">'+p.brand+'</div><div class="card-name">'+p.nama+'</div><div class="card-spec">'+(p.spec||'')+'</div><div class="card-price">'+formatRp(p.harga)+' <small>/ unit</small></div>'+btn+'</div></div>';
   }).join('');
 }
 
@@ -585,19 +575,8 @@ function renderAdminList(){
   if(!products.length){ el.innerHTML='<div style="text-align:center;color:var(--text3);padding:24px">Belum ada produk.</div>'; return; }
   el.innerHTML=products.map(p=>{
     const si=stokInfo(p.stok);
-    const thumb=p.img?`<img src="${p.img}" alt="">`:`${p.icon||'📦'}`;
-    return `<div class="product-list-item">
-      <div class="item-thumb">${thumb}</div>
-      <div class="item-info">
-        <div class="item-name">${p.brand} ${p.nama}</div>
-        <div class="item-meta">${p.kategori} · ${formatRp(p.harga)} · <span class="badge-stok ${si.cls}" style="position:static;padding:2px 7px">${si.label} (${p.stok})</span></div>
-      </div>
-      <div class="item-actions">
-        <button class="btn-edit" onclick="editStok(${p.id})">Stok</button>
-        <button class="btn-edit" onclick="editProduk(${p.id})">Edit</button>
-        <button class="btn-danger" style="padding:6px 10px;font-size:12px" onclick="hapusProduk(${p.id})">✕</button>
-      </div>
-    </div>`;
+    const thumb=p.img?'<img src="'+p.img+'" alt="">':''+( p.icon||'📦');
+    return '<div class="product-list-item"><div class="item-thumb">'+thumb+'</div><div class="item-info"><div class="item-name">'+p.brand+' '+p.nama+'</div><div class="item-meta">'+p.kategori+' · '+formatRp(p.harga)+' · <span class="badge-stok '+si.cls+'" style="position:static;padding:2px 7px">'+si.label+' ('+p.stok+')</span></div></div><div class="item-actions"><button class="btn-edit" onclick="editStok('+p.id+')">Stok</button><button class="btn-edit" onclick="editProduk('+p.id+')">Edit</button><button class="btn-danger" style="padding:6px 10px;font-size:12px" onclick="hapusProduk('+p.id+')">✕</button></div></div>';
   }).join('');
 }
 async function handleImageUpload(e){
@@ -610,11 +589,8 @@ async function handleImageUpload(e){
   try{
     const res=await fetch('https://api.cloudinary.com/v1_1/daifklyv9/image/upload',{method:'POST',body:formData});
     const data=await res.json();
-    if(data.secure_url){
-      currentImageBase64=data.secure_url;
-      showImagePreview(data.secure_url);
-      showToast('✅ Foto berhasil diupload!');
-    } else { showToast('❌ Gagal upload foto!'); console.error(data); }
+    if(data.secure_url){ currentImageBase64=data.secure_url; showImagePreview(data.secure_url); showToast('✅ Foto berhasil diupload!'); }
+    else { showToast('❌ Gagal upload foto!'); }
   } catch(err){ showToast('❌ Error upload foto!'); console.error(err); }
   e.target.value='';
 }
@@ -635,16 +611,7 @@ function removeImage(){
 }
 function editStok(id){
   const p=products.find(x=>x.id===id); if(!p) return;
-  document.getElementById('stokModalContent').innerHTML=`
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-      <div style="width:44px;height:44px;border-radius:8px;background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${p.img?`<img src="${p.img}" style="width:100%;height:100%;object-fit:cover">`:(p.icon||'📦')}</div>
-      <div><div style="font-weight:600;font-size:14px">${p.brand} ${p.nama}</div><div style="font-size:12px;color:var(--text3)">${p.kategori}</div></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Stok Saat Ini: <strong style="color:var(--accent2)">${p.stok}</strong></label>
-      <input class="form-input" id="stokVal" type="number" value="${p.stok}" min="0">
-    </div>
-    <button class="btn-primary" onclick="simpanStok(${id})">Simpan Stok</button>`;
+  document.getElementById('stokModalContent').innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><div style="width:44px;height:44px;border-radius:8px;background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+(p.img?'<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover">':(p.icon||'📦'))+'</div><div><div style="font-weight:600;font-size:14px">'+p.brand+' '+p.nama+'</div><div style="font-size:12px;color:var(--text3)">'+p.kategori+'</div></div></div><div class="form-group"><label class="form-label">Stok Saat Ini: <strong style="color:var(--accent2)">'+p.stok+'</strong></label><input class="form-input" id="stokVal" type="number" value="'+p.stok+'" min="0"></div><button class="btn-primary" onclick="simpanStok('+id+')">Simpan Stok</button>';
   document.getElementById('stokModal').classList.add('open');
 }
 function closeStokModal(){ document.getElementById('stokModal').classList.remove('open'); }
@@ -701,12 +668,11 @@ async function simpanProduk(){
 }
 async function hapusProduk(id){
   const p=products.find(x=>x.id===id); if(!p) return;
-  if(!confirm(`Hapus "${p.brand} ${p.nama}"?`)) return;
+  if(!confirm('Hapus "'+p.brand+' '+p.nama+'"?')) return;
   products=products.filter(x=>x.id!==id);
   await saveProducts(); render(); renderAdminList();
 }
 
-// ======== EXCEL ========
 function downloadTemplate(){
   if(typeof XLSX==='undefined'){ showToast('❌ Library Excel belum siap'); return; }
   const rows=[['ID','Brand','Nama','Kategori','Harga','Stok','Spesifikasi'],
@@ -715,17 +681,13 @@ function downloadTemplate(){
   ws['!cols']=[{wch:6},{wch:14},{wch:28},{wch:14},{wch:14},{wch:8},{wch:30}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Stok Produk');
-  XLSX.writeFile(wb,`agres_id_stok_${new Date().toISOString().slice(0,10)}.xlsx`);
+  XLSX.writeFile(wb,'agres_id_stok_'+new Date().toISOString().slice(0,10)+'.xlsx');
   showToast('📥 Template berhasil didownload!');
 }
 const dropZone=document.getElementById('excelDropZone');
 dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('dragover');});
 dropZone.addEventListener('dragleave',()=>{dropZone.classList.remove('dragover');});
-dropZone.addEventListener('drop',e=>{
-  e.preventDefault();dropZone.classList.remove('dragover');
-  const file=e.dataTransfer.files[0];
-  if(file) processExcelFile(file);
-});
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('dragover');const file=e.dataTransfer.files[0];if(file)processExcelFile(file);});
 function handleExcelUpload(e){ const file=e.target.files[0]; if(file) processExcelFile(file); e.target.value=''; }
 function processExcelFile(file){
   if(file.size>5*1024*1024){ showToast('❌ File terlalu besar (maks 5MB)'); return; }
@@ -755,7 +717,7 @@ function processExcelFile(file){
           return {status:'new',brand,nama,kategori,spec,newStok,newHarga};
         }
         const p=products.find(x=>x.id===id);
-        if(!p) return {status:'err',id,errMsg:`ID ${id} tidak ditemukan`,raw:row};
+        if(!p) return {status:'err',id,errMsg:'ID '+id+' tidak ditemukan',raw:row};
         if(isNaN(newStok)||newStok<0) return {status:'err',id,product:p,errMsg:'Stok tidak valid',raw:row};
         const stokChanged=newStok!==p.stok;
         const hargaValid=newHarga!==null&&!isNaN(newHarga)&&newHarga>0;
@@ -763,7 +725,7 @@ function processExcelFile(file){
         return {status:(stokChanged||hargaChanged)?'ok':'same',id,product:p,oldStok:p.stok,newStok,oldHarga:p.harga,newHarga:hargaValid?newHarga:p.harga,stokChanged,hargaChanged};
       });
       renderExcelPreview();
-      showToast(`📊 ${rows.length} baris terbaca`);
+      showToast('📊 '+rows.length+' baris terbaca');
     } catch(err){ console.error(err); showToast('❌ Gagal membaca file'); }
   };
   reader.readAsArrayBuffer(file);
@@ -773,22 +735,17 @@ function renderExcelPreview(){
   const countNew=excelRows.filter(r=>r.status==='new').length;
   const countSame=excelRows.filter(r=>r.status==='same').length;
   const countErr=excelRows.filter(r=>r.status==='err').length;
-  document.getElementById('excelSummary').innerHTML=`
-    ${countNew?`<span style="color:var(--accent2)">✨ <strong>${countNew}</strong> produk baru</span>`:''}
-    <span style="color:var(--green)">✅ <strong>${countOk}</strong> akan diubah</span>
-    <span style="color:var(--text3)">⬜ <strong>${countSame}</strong> tidak berubah</span>
-    ${countErr?`<span style="color:var(--red)">❌ <strong>${countErr}</strong> error</span>`:''}
-    <span style="color:var(--text2)">📦 Total: <strong>${excelRows.length}</strong> baris</span>`;
+  document.getElementById('excelSummary').innerHTML=(countNew?'<span style="color:var(--accent2)">✨ <strong>'+countNew+'</strong> produk baru</span>':'')+'<span style="color:var(--green)">✅ <strong>'+countOk+'</strong> akan diubah</span><span style="color:var(--text3)">⬜ <strong>'+countSame+'</strong> tidak berubah</span>'+(countErr?'<span style="color:var(--red)">❌ <strong>'+countErr+'</strong> error</span>':'')+'<span style="color:var(--text2)">📦 Total: <strong>'+excelRows.length+'</strong> baris</span>';
   const btn=document.getElementById('btnApplyExcel');
   btn.disabled=(countOk+countNew)===0;
   btn.style.opacity=(countOk+countNew)===0?'0.45':'1';
   document.getElementById('excelPreviewBody').innerHTML=excelRows.map(r=>{
-    if(r.status==='err') return `<tr class="row-err"><td style="color:var(--text3)">${r.id||'—'}</td><td>${r.product?r.product.brand+' '+r.product.nama:(r.brand&&r.nama?r.brand+' '+r.nama:'—')}</td><td>—</td><td colspan="2" style="color:var(--red);font-size:12px">⚠️ ${r.errMsg}</td><td><span class="badge-change err">Error</span></td></tr>`;
-    if(r.status==='new') return `<tr class="row-ok"><td style="color:var(--accent2)">Baru</td><td><strong>${r.brand}</strong> ${r.nama}</td><td style="color:var(--text3)">${r.kategori}</td><td style="color:var(--green);font-weight:700">${r.newStok}</td><td style="color:var(--green);font-size:12px;font-weight:700">${formatRp(r.newHarga)}</td><td><span class="badge-change ok">+ Baru</span></td></tr>`;
+    if(r.status==='err') return '<tr class="row-err"><td style="color:var(--text3)">'+(r.id||'—')+'</td><td>'+(r.product?r.product.brand+' '+r.product.nama:(r.brand&&r.nama?r.brand+' '+r.nama:'—'))+'</td><td>—</td><td colspan="2" style="color:var(--red);font-size:12px">⚠️ '+r.errMsg+'</td><td><span class="badge-change err">Error</span></td></tr>';
+    if(r.status==='new') return '<tr class="row-ok"><td style="color:var(--accent2)">Baru</td><td><strong>'+r.brand+'</strong> '+r.nama+'</td><td style="color:var(--text3)">'+r.kategori+'</td><td style="color:var(--green);font-weight:700">'+r.newStok+'</td><td style="color:var(--green);font-size:12px;font-weight:700">'+formatRp(r.newHarga)+'</td><td><span class="badge-change ok">+ Baru</span></td></tr>';
     const p=r.product;
-    const stokCell=r.stokChanged?`<span class="val-change"><span class="val-old">${r.oldStok}</span><span class="val-arrow">→</span><span class="${r.newStok>r.oldStok?'val-new-up':'val-new-dn'}">${r.newStok}</span></span>`:`<span style="color:var(--text3)">${r.newStok}</span>`;
-    const hargaCell=r.hargaChanged?`<span class="val-change"><span class="val-old" style="font-size:11px">${formatRp(r.oldHarga)}</span><span class="val-arrow">→</span><span class="${r.newHarga>r.oldHarga?'val-new-up':'val-new-dn'}" style="font-size:12px">${formatRp(r.newHarga)}</span></span>`:`<span style="color:var(--text3);font-size:12px">${formatRp(r.oldHarga)}</span>`;
-    return `<tr class="${r.status==='ok'?'row-ok':'row-same'}"><td style="color:var(--text3)">${p.id}</td><td><strong>${p.brand}</strong> ${p.nama}</td><td style="color:var(--text3)">${p.kategori}</td><td>${stokCell}</td><td>${hargaCell}</td><td><span class="badge-change ${r.status==='ok'?'ok':'same'}">${r.status==='ok'?'Diubah':'Sama'}</span></td></tr>`;
+    const stokCell=r.stokChanged?'<span class="val-change"><span class="val-old">'+r.oldStok+'</span><span class="val-arrow">→</span><span class="'+(r.newStok>r.oldStok?'val-new-up':'val-new-dn')+'">'+r.newStok+'</span></span>':'<span style="color:var(--text3)">'+r.newStok+'</span>';
+    const hargaCell=r.hargaChanged?'<span class="val-change"><span class="val-old" style="font-size:11px">'+formatRp(r.oldHarga)+'</span><span class="val-arrow">→</span><span class="'+(r.newHarga>r.oldHarga?'val-new-up':'val-new-dn')+'" style="font-size:12px">'+formatRp(r.newHarga)+'</span></span>':'<span style="color:var(--text3);font-size:12px">'+formatRp(r.oldHarga)+'</span>';
+    return '<tr class="'+(r.status==='ok'?'row-ok':'row-same')+'"><td style="color:var(--text3)">'+p.id+'</td><td><strong>'+p.brand+'</strong> '+p.nama+'</td><td style="color:var(--text3)">'+p.kategori+'</td><td>'+stokCell+'</td><td>'+hargaCell+'</td><td><span class="badge-change '+(r.status==='ok'?'ok':'same')+'">'+(r.status==='ok'?'Diubah':'Sama')+'</span></td></tr>';
   }).join('');
   document.getElementById('excelPreviewSection').style.display='block';
   document.getElementById('excelPreviewSection').scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -813,7 +770,7 @@ async function applyExcelChanges(){
   render(); renderAdminList();
   cancelExcelPreview();
   switchAdminTab('list',document.getElementById('tabBtnList'));
-  showToast(`✅ ${toApply.length} diupdate + ${toAdd.length} produk baru!`);
+  showToast('✅ '+toApply.length+' diupdate + '+toAdd.length+' produk baru!');
 }
 function cancelExcelPreview(){
   excelRows=[];
@@ -841,24 +798,21 @@ function initSlideshow(imgs){
   const dotsEl = document.getElementById('heroDots');
   const overlay = bg.querySelector('.hero-bg-overlay');
   let current = 0;
-
-  const slides = imgs.map((src,i)=>{
+  const slides = imgs.map(function(src,i){
     const div = document.createElement('div');
     div.className = 'hero-bg-slide' + (i===0?' active':'');
-    div.style.backgroundImage = "url('" + src + "')";
+    div.style.backgroundImage = "url('"+src+"')";
     bg.insertBefore(div, overlay);
     return div;
   });
-
   if(imgs.length>1){
-    imgs.forEach((_,i)=>{
+    imgs.forEach(function(_,i){
       const dot = document.createElement('div');
       dot.className = 'hero-dot' + (i===0?' active':'');
-      dot.onclick = ()=>goTo(i);
+      dot.onclick = function(){ goTo(i); };
       dotsEl.appendChild(dot);
     });
   }
-
   function goTo(idx){
     slides[current].classList.remove('active');
     if(dotsEl.children[current]) dotsEl.children[current].classList.remove('active');
@@ -866,9 +820,8 @@ function initSlideshow(imgs){
     slides[current].classList.add('active');
     if(dotsEl.children[current]) dotsEl.children[current].classList.add('active');
   }
-
   if(imgs.length>1){
-    setInterval(()=>goTo((current+1)%imgs.length), 4500);
+    setInterval(function(){ goTo((current+1)%imgs.length); }, 4500);
   }
 }
 
@@ -880,15 +833,6 @@ function loadHeroBanners(){
   ];
   initSlideshow(imgs);
 }
-    const files = await r.json();
-    if(!Array.isArray(files)||!files.length) return;
-    const imgs = files
-      .filter(f=>f.name&&/\.(jpg|jpeg|png|webp|gif)$/i.test(f.name))
-      .map(f=>SUPA_URL+'/storage/v1/object/public/banner/'+f.name);
-    if(!imgs.length) return;
-    initSlideshow(imgs);
-  } catch(e){ console.error('Banner error:',e); }
-}
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', function(){
@@ -899,14 +843,12 @@ document.addEventListener('DOMContentLoaded', function(){
 async function loadData(){
   if(isLoaded) return;
   isLoaded=true;
-  showToast('⏳ Memuat data...');
   try{
     const [cfg, prods] = await Promise.all([dbGetConfig(), dbGetProducts()]);
     config = cfg;
     products = Array.isArray(prods) ? prods : [];
     nextId = Math.max(0,...products.map(p=>Number(p.id)||0))+1;
     render();
-    showToast('✅ Data berhasil dimuat!');
   } catch(err){
     console.error('Load error:',err);
     showToast('❌ Gagal load data');
