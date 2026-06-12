@@ -872,13 +872,14 @@ function initSlideshow(imgs){
   }
 }
 
-async function loadHeroBanners(){
-  try{
-    const r = await fetch(SUPA_URL+'/storage/v1/object/list/banner',{
-  method:'POST',
-  headers:{...HEADERS,'Content-Type':'application/json'},
-  body: JSON.stringify({limit:20, offset:0, prefix:''})
-});
+function loadHeroBanners(){
+  var imgs = [
+    'https://dyfhdigucrhzitjrouhk.supabase.co/storage/v1/object/public/banner/banner1.jpg',
+    'https://dyfhdigucrhzitjrouhk.supabase.co/storage/v1/object/public/banner/banner2.jpg',
+    'https://dyfhdigucrhzitjrouhk.supabase.co/storage/v1/object/public/banner/banner3.jpg'
+  ];
+  initSlideshow(imgs);
+}
     const files = await r.json();
     if(!Array.isArray(files)||!files.length) return;
     const imgs = files
