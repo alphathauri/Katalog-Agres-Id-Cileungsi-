@@ -584,7 +584,8 @@ function render(){
     const ms = !q || (p.nama||'').toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q) || (p.spec||'').toLowerCase().includes(q);
     return mk && ms;
   });
-  document.getElementById('statProduk').textContent = products.filter(p=>p.stok>0).length;
+  const statEl = document.getElementById('statProduk');
+if (statEl) statEl.textContent = products.filter(p=>p.stok>0).length;
   const grid = document.getElementById('productGrid');
   const empty = document.getElementById('emptyState');
   if(!filtered.length){ grid.innerHTML=''; empty.style.display='block'; return; }
