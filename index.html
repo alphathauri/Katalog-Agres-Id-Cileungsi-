@@ -403,9 +403,14 @@ async function dbGetProducts(){
   return await r.json();
 }
 async function dbGetConfig(){
-  const r = await fetch(SUPA_URL+'/rest/v1/config?key=eq.wa',{headers:HEADERS});
+  const r = await fetch(SUPA_URL+'/rest/v1/config', {headers: HEADERS});
   const d = await r.json();
-  return d[0] ? {wa: d[0].value} : {wa:'6281322569903'};
+  const get = (key, def) => (d.find(x => x.key === key)?.value || def);
+  return {
+    wa:   get('wa',   '6281322569903'),
+    user: get('user', 'admin'),
+    pass: get('pass', 'admin123')
+  };
 }
 async function dbSaveProducts(prods){
   await fetch(SUPA_URL+'/rest/v1/products?id=gte.0',{method:'DELETE',headers:HEADERS});
@@ -449,7 +454,7 @@ function stokInfo(stok){
   return {cls:'ada',label:'Tersedia'};
 }
 function getCreds(){
-  return JSON.parse(localStorage.getItem('ts_creds')) || creds;
+  return { user: config.user, pass: config.pass };
 }
 async function saveProducts(){ await dbSaveProducts(products); }
 async function saveConfig(){ await dbSaveConfig(config.wa); }
@@ -535,22 +540,34 @@ function openChangePw(){
   document.getElementById('changePwModal').classList.add('open');
 }
 document.getElementById('changePwModal').addEventListener('click',function(e){ if(e.target===this)this.classList.remove('open'); });
-function doChangePassword(){
-  const newUser=document.getElementById('newUser').value.trim();
-  const oldPass=document.getElementById('oldPass').value;
-  const newPass=document.getElementById('newPass').value;
-  const newPass2=document.getElementById('newPass2').value;
-  const err=document.getElementById('changePwError');
-  const ok=document.getElementById('changePwSuccess');
-  const c=getCreds();
+async function doChangePassword(){
+  const newUser = document.getElementById('newUser').value.trim();
+  const oldPass = document.getElementById('oldPass').value;
+  const newPass = document.getElementById('newPass').value;
+  const newPass2 = document.getElementById('newPass2').value;
+  const err = document.getElementById('changePwError');
+  const ok  = document.getElementById('changePwSuccess');
   err.style.display='none'; ok.style.display='none';
-  if(!newUser){err.textContent='Username tidak boleh kosong!';err.style.display='block';return;}
-  if(oldPass!==c.pass){err.textContent='❌ Password lama salah!';err.style.display='block';return;}
-  if(newPass.length<6){err.textContent='Password baru minimal 6 karakter!';err.style.display='block';return;}
-  if(newPass!==newPass2){err.textContent='❌ Konfirmasi tidak cocok!';err.style.display='block';return;}
-  localStorage.setItem('ts_creds',JSON.stringify({user:newUser,pass:newPass}));
+
+  if(!newUser){ err.textContent='Username tidak boleh kosong!'; err.style.display='block'; return; }
+  if(oldPass !== config.pass){ err.textContent='❌ Password lama salah!'; err.style.display='block'; return; }
+  if(newPass.length < 6){ err.textContent='Password baru minimal 6 karakter!'; err.style.display='block'; return; }
+  if(newPass !== newPass2){ err.textContent='❌ Konfirmasi tidak cocok!'; err.style.display='block'; return; }
+
+  await fetch(SUPA_URL+'/rest/v1/config?key=eq.user', {method:'DELETE', headers:HEADERS});
+  await fetch(SUPA_URL+'/rest/v1/config?key=eq.pass', {method:'DELETE', headers:HEADERS});
+  await fetch(SUPA_URL+'/rest/v1/config', {
+    method: 'POST',
+    headers: {...HEADERS, 'Prefer':'return=minimal'},
+    body: JSON.stringify([{key:'user', value:newUser}, {key:'pass', value:newPass}])
+  });
+
+  config.user = newUser;
+  config.pass = newPass;
+  localStorage.removeItem('ts_creds');
+
   ok.textContent='✅ Password berhasil diubah!'; ok.style.display='block';
-  setTimeout(()=>document.getElementById('changePwModal').classList.remove('open'),1500);
+  setTimeout(()=>document.getElementById('changePwModal').classList.remove('open'), 1500);
 }
 function closeAdmin(){ document.getElementById('adminModal').classList.remove('open'); resetForm(); cancelExcelPreview(); }
 document.getElementById('adminModal').addEventListener('click',function(e){ if(e.target===this)closeAdmin(); });
