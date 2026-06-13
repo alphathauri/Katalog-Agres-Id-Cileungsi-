@@ -95,12 +95,34 @@ header{background:rgba(10,10,15,0.96);backdrop-filter:blur(12px);border-bottom:1
 .img-upload-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.6);display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
 .img-upload-area:hover .img-upload-overlay{display:flex;}
 .img-upload-overlay span{font-size:13px;color:#fff;font-weight:500;}
-.img-actions{display:flex;gap:8px;margin-top:8px;}
+.img-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center;}
 .btn-img-remove{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.3);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;}
 .btn-img-remove:hover{background:rgba(239,68,68,0.22);}
 .btn-auto-foto{background:rgba(108,99,255,0.12);color:var(--accent2);border:1px solid rgba(108,99,255,0.3);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;}
 .btn-auto-foto:hover{background:rgba(108,99,255,0.22);}
 .btn-auto-foto:disabled{opacity:0.5;cursor:not-allowed;}
+/* ===== URL INPUT FOTO - FITUR BARU ===== */
+.btn-url-foto{background:rgba(245,158,11,0.12);color:var(--yellow);border:1px solid rgba(245,158,11,0.3);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;}
+.btn-url-foto:hover{background:rgba(245,158,11,0.22);}
+.url-input-box{display:none;margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.url-input-box.open{display:block;}
+.url-input-row{display:flex;gap:8px;align-items:center;}
+.url-input-row input{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:7px;font-size:13px;outline:none;transition:border-color .2s;font-family:'Inter',sans-serif;}
+.url-input-row input:focus{border-color:var(--accent2);}
+.url-input-row input.url-err{border-color:var(--red);}
+.url-input-row input.url-ok{border-color:var(--green);}
+.btn-url-pakai{background:var(--accent);color:#fff;border:none;padding:9px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap;}
+.btn-url-pakai:hover{background:#5b52e0;}
+.url-preview-wrap{margin-top:10px;display:none;}
+.url-preview-wrap.show{display:flex;align-items:center;gap:10px;}
+.url-preview-img{width:72px;height:54px;border-radius:7px;object-fit:cover;border:1px solid var(--border);}
+.url-preview-info{flex:1;}
+.url-preview-name{font-size:12px;color:var(--text2);word-break:break-all;line-height:1.5;}
+.url-status{font-size:11px;margin-top:3px;}
+.url-status.ok{color:var(--green);}
+.url-status.err{color:var(--red);}
+.url-hint{font-size:11px;color:var(--text3);margin-top:7px;line-height:1.6;}
+/* ===== END URL INPUT ===== */
 .foto-picker{display:none;margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;}
 .foto-picker-title{font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px;}
 .foto-picker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
@@ -319,12 +341,36 @@ footer strong{color:var(--text2);}
           <div class="img-upload-overlay" id="imgOverlay"><span>🔄 Ganti Foto</span></div>
         </div>
         <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
-        <div class="img-actions" style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+
+        <!-- TOMBOL AKSI FOTO -->
+        <div class="img-actions">
           <div id="imgActions" style="display:none">
             <button class="btn-img-remove" onclick="removeImage()">🗑️ Hapus Foto</button>
           </div>
           <button class="btn-auto-foto" id="btnAutoFoto" onclick="cariFotoOtomatis()" title="Cari foto otomatis berdasarkan nama produk">🔍 Cari Foto Otomatis</button>
+          <button class="btn-url-foto" id="btnUrlFoto" onclick="toggleUrlInput()" title="Tempel URL gambar dari internet">🔗 Tempel URL Gambar</button>
         </div>
+
+        <!-- URL INPUT BOX (FITUR BARU) -->
+        <div class="url-input-box" id="urlInputBox">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;">🔗 Tempel URL Gambar</div>
+          <div class="url-input-row">
+            <input type="url" id="urlFotoInput" placeholder="https://contoh.com/gambar-produk.jpg" oninput="onUrlInput()" onkeydown="if(event.key==='Enter')pakaiUrlFoto()">
+            <button class="btn-url-pakai" onclick="pakaiUrlFoto()">Pakai</button>
+          </div>
+          <div class="url-preview-wrap" id="urlPreviewWrap">
+            <img class="url-preview-img" id="urlPreviewImg" src="" alt="preview">
+            <div class="url-preview-info">
+              <div class="url-preview-name" id="urlPreviewName"></div>
+              <div class="url-status" id="urlStatus"></div>
+            </div>
+          </div>
+          <div class="url-hint">
+            💡 Salin URL gambar dari mana saja: Tokopedia, Shopee, Google Images, dll.<br>
+            Klik kanan gambar → <strong style="color:var(--text2)">Salin alamat gambar</strong> → tempel di sini.
+          </div>
+        </div>
+
         <div class="foto-picker" id="fotoPicker">
           <div class="foto-picker-title">Pilih foto (klik untuk pakai):</div>
           <div class="foto-picker-grid" id="fotoPickerGrid"></div>
@@ -646,6 +692,96 @@ function removeImage(){
   document.getElementById('imgUploadArea').classList.remove('has-image');
   document.getElementById('imgActions').style.display='none';
 }
+
+// ===== FITUR BARU: TEMPEL URL GAMBAR =====
+function toggleUrlInput(){
+  const box = document.getElementById('urlInputBox');
+  const isOpen = box.classList.contains('open');
+  box.classList.toggle('open');
+  if(!isOpen){
+    // Tutup foto picker jika terbuka
+    document.getElementById('fotoPicker').style.display='none';
+    setTimeout(()=>document.getElementById('urlFotoInput').focus(), 100);
+  } else {
+    resetUrlInput();
+  }
+}
+
+function onUrlInput(){
+  const val = document.getElementById('urlFotoInput').value.trim();
+  const inp = document.getElementById('urlFotoInput');
+  const preview = document.getElementById('urlPreviewWrap');
+  const status = document.getElementById('urlStatus');
+
+  inp.classList.remove('url-err','url-ok');
+  preview.classList.remove('show');
+
+  if(!val) return;
+
+  // Validasi format URL dasar
+  try { new URL(val); } catch(e){ inp.classList.add('url-err'); return; }
+
+  // Cek apakah URL mengandung ekstensi gambar umum ATAU tampilkan preview saja
+  const imgExts = /\.(jpg|jpeg|png|webp|gif|avif|svg)(\?.*)?$/i;
+  const looksLikeImg = imgExts.test(val) || val.includes('images') || val.includes('photo') || val.includes('img') || val.includes('cdn') || val.includes('static') || val.includes('media');
+
+  if(looksLikeImg || val.startsWith('https://')){
+    // Coba load gambar untuk preview
+    const testImg = new Image();
+    testImg.onload = function(){
+      document.getElementById('urlPreviewImg').src = val;
+      document.getElementById('urlPreviewName').textContent = val.length > 60 ? val.slice(0,57)+'...' : val;
+      status.textContent = '✅ Gambar valid — klik Pakai';
+      status.className = 'url-status ok';
+      inp.classList.add('url-ok');
+      preview.classList.add('show');
+    };
+    testImg.onerror = function(){
+      status.textContent = '⚠️ Gambar tidak bisa dimuat — coba URL lain';
+      status.className = 'url-status err';
+      inp.classList.add('url-err');
+      document.getElementById('urlPreviewName').textContent = val.length > 60 ? val.slice(0,57)+'...' : val;
+      preview.classList.add('show');
+    };
+    testImg.src = val;
+  }
+}
+
+function pakaiUrlFoto(){
+  const val = document.getElementById('urlFotoInput').value.trim();
+  if(!val){ showToast('⚠️ Masukkan URL gambar dulu!'); return; }
+
+  try { new URL(val); } catch(e){ showToast('❌ Format URL tidak valid!'); return; }
+
+  // Coba pakai langsung
+  const testImg = new Image();
+  testImg.onload = function(){
+    currentImageBase64 = val;
+    showImagePreview(val);
+    // Tutup URL box dan reset
+    document.getElementById('urlInputBox').classList.remove('open');
+    resetUrlInput();
+    showToast('✅ Foto dari URL berhasil dipakai!');
+  };
+  testImg.onerror = function(){
+    // Tetap pakai URL meski tidak bisa divalidasi (mungkin CORS)
+    currentImageBase64 = val;
+    showImagePreview(val);
+    document.getElementById('urlInputBox').classList.remove('open');
+    resetUrlInput();
+    showToast('✅ URL foto disimpan!');
+  };
+  testImg.src = val;
+}
+
+function resetUrlInput(){
+  document.getElementById('urlFotoInput').value = '';
+  document.getElementById('urlFotoInput').classList.remove('url-err','url-ok');
+  document.getElementById('urlPreviewWrap').classList.remove('show');
+  document.getElementById('urlStatus').textContent = '';
+}
+// ===== END FITUR URL =====
+
 function editStok(id){
   const p=products.find(x=>x.id===id); if(!p) return;
   document.getElementById('stokModalContent').innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><div style="width:44px;height:44px;border-radius:8px;background:var(--bg3);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+(p.img?'<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover">':(p.icon||'📦'))+'</div><div><div style="font-weight:600;font-size:14px">'+p.brand+' '+p.nama+'</div><div style="font-size:12px;color:var(--text3)">'+p.kategori+'</div></div></div><div class="form-group"><label class="form-label">Stok Saat Ini: <strong style="color:var(--accent2)">'+p.stok+'</strong></label><input class="form-input" id="stokVal" type="number" value="'+p.stok+'" min="0"></div><button class="btn-primary" onclick="simpanStok('+id+')">Simpan Stok</button>';
@@ -682,6 +818,8 @@ function resetForm(){
   document.getElementById('fIcon').value='';
   document.getElementById('btnSimpanProduk').textContent='Simpan Produk';
   document.getElementById('fotoPicker').style.display='none';
+  document.getElementById('urlInputBox').classList.remove('open');
+  resetUrlInput();
   currentImageBase64=null; removeImage();
 }
 // ===== AUTO FOTO UNSPLASH =====
@@ -690,7 +828,6 @@ const UNSPLASH_KEY = 'Zn8JD7zUSfBbOYUcVBW3IfBSYmH8-u4G_Bk7OWp7jg';
 async function cariFotoOtomatis(){
   const brand = document.getElementById('fBrand').value.trim();
   const nama  = document.getElementById('fNama').value.trim();
-  const spec  = document.getElementById('fSpec').value.trim();
 
   if(!brand && !nama){ showToast('⚠️ Isi Brand atau Nama Produk dulu!'); return; }
 
@@ -698,7 +835,10 @@ async function cariFotoOtomatis(){
   btn.disabled = true;
   btn.innerHTML = '⏳ Mencari...';
 
-  // Buat keyword dari nama produk
+  // Tutup URL box jika terbuka
+  document.getElementById('urlInputBox').classList.remove('open');
+  resetUrlInput();
+
   const stopwords = ['dan','atau','dengan','untuk','dari','yang','ke','di','ini','itu','gb','tb','ram','ssd','hdd','inch','pro','max','ultra','plus','lite'];
   const rawWords = (brand + ' ' + nama).split(/\s+/);
   const keyword = rawWords.filter(w => w.length > 1 && !stopwords.includes(w.toLowerCase())).slice(0,4).join(' ');
