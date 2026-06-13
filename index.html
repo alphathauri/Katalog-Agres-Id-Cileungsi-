@@ -967,15 +967,39 @@ function processExcelFile(file){
   reader.readAsArrayBuffer(file);
 }
 function renderExcelPreview(){
+  const uploadedIds = new Set(excelRows.filter(r=>r.id).map(r=>r.id));
+  const toDelete = products.filter(p => !uploadedIds.has(p.id));
+
   const countOk=excelRows.filter(r=>r.status==='ok').length;
   const countNew=excelRows.filter(r=>r.status==='new').length;
   const countSame=excelRows.filter(r=>r.status==='same').length;
   const countErr=excelRows.filter(r=>r.status==='err').length;
-  document.getElementById('excelSummary').innerHTML=(countNew?'<span style="color:var(--accent2)">✨ <strong>'+countNew+'</strong> produk baru</span>':'')+'<span style="color:var(--green)">✅ <strong>'+countOk+'</strong> akan diubah</span><span style="color:var(--text3)">⬜ <strong>'+countSame+'</strong> tidak berubah</span>'+(countErr?'<span style="color:var(--red)">❌ <strong>'+countErr+'</strong> error</span>':'')+'<span style="color:var(--text2)">📦 Total: <strong>'+excelRows.length+'</strong> baris</span>';
+  const countDel=toDelete.length;
+
+  document.getElementById('excelSummary').innerHTML=
+    (countNew?'<span style="color:var(--accent2)">✨ <strong>'+countNew+'</strong> produk baru</span>':'')+
+    '<span style="color:var(--green)">✅ <strong>'+countOk+'</strong> akan diubah</span>'+
+    '<span style="color:var(--text3)">⬜ <strong>'+countSame+'</strong> tidak berubah</span>'+
+    (countDel?'<span style="color:var(--red)">🗑️ <strong>'+countDel+'</strong> akan dihapus</span>':'')+
+    (countErr?'<span style="color:var(--red)">❌ <strong>'+countErr+'</strong> error</span>':'')+
+    '<span style="color:var(--text2)">📦 Total: <strong>'+excelRows.length+'</strong> baris</span>';
+
   const btn=document.getElementById('btnApplyExcel');
-  btn.disabled=(countOk+countNew)===0;
-  btn.style.opacity=(countOk+countNew)===0?'0.45':'1';
-  document.getElementById('excelPreviewBody').innerHTML=excelRows.map(r=>{
+  btn.disabled=(countOk+countNew+countDel)===0;
+  btn.style.opacity=(countOk+countNew+countDel)===0?'0.45':'1';
+
+  const deleteRows = toDelete.map(p=>
+    '<tr class="row-err">'+
+    '<td style="color:var(--text3)">'+p.id+'</td>'+
+    '<td><strong>'+p.brand+'</strong> '+p.nama+'</td>'+
+    '<td style="color:var(--text3)">'+p.kategori+'</td>'+
+    '<td style="color:var(--red)">'+p.stok+'</td>'+
+    '<td style="color:var(--red);font-size:12px">'+formatRp(p.harga)+'</td>'+
+    '<td><span class="badge-change err">🗑️ Dihapus</span></td>'+
+    '</tr>'
+  ).join('');
+
+  document.getElementById('excelPreviewBody').innerHTML=deleteRows+excelRows.map(r=>{
     if(r.status==='err') return '<tr class="row-err"><td style="color:var(--text3)">'+(r.id||'—')+'</td><td>'+(r.product?r.product.brand+' '+r.product.nama:(r.brand&&r.nama?r.brand+' '+r.nama:'—'))+'</td><td>—</td><td colspan="2" style="color:var(--red);font-size:12px">⚠️ '+r.errMsg+'</td><td><span class="badge-change err">Error</span></td></tr>';
     if(r.status==='new') return '<tr class="row-ok"><td style="color:var(--accent2)">Baru</td><td><strong>'+r.brand+'</strong> '+r.nama+'</td><td style="color:var(--text3)">'+r.kategori+'</td><td style="color:var(--green);font-weight:700">'+r.newStok+'</td><td style="color:var(--green);font-size:12px;font-weight:700">'+formatRp(r.newHarga)+'</td><td><span class="badge-change ok">+ Baru</span></td></tr>';
     const p=r.product;
@@ -983,13 +1007,28 @@ function renderExcelPreview(){
     const hargaCell=r.hargaChanged?'<span class="val-change"><span class="val-old" style="font-size:11px">'+formatRp(r.oldHarga)+'</span><span class="val-arrow">→</span><span class="'+(r.newHarga>r.oldHarga?'val-new-up':'val-new-dn')+'" style="font-size:12px">'+formatRp(r.newHarga)+'</span></span>':'<span style="color:var(--text3);font-size:12px">'+formatRp(r.oldHarga)+'</span>';
     return '<tr class="'+(r.status==='ok'?'row-ok':'row-same')+'"><td style="color:var(--text3)">'+p.id+'</td><td><strong>'+p.brand+'</strong> '+p.nama+'</td><td style="color:var(--text3)">'+p.kategori+'</td><td>'+stokCell+'</td><td>'+hargaCell+'</td><td><span class="badge-change '+(r.status==='ok'?'ok':'same')+'">'+(r.status==='ok'?'Diubah':'Sama')+'</span></td></tr>';
   }).join('');
+
   document.getElementById('excelPreviewSection').style.display='block';
   document.getElementById('excelPreviewSection').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 async function applyExcelChanges(){
   const toApply=excelRows.filter(r=>r.status==='ok');
   const toAdd=excelRows.filter(r=>r.status==='new');
-  if(!toApply.length&&!toAdd.length){ showToast('Tidak ada perubahan'); return; }
+  const uploadedIds = new Set(excelRows.filter(r=>r.id).map(r=>r.id));
+  const toDelete = products.filter(p => !uploadedIds.has(p.id));
+
+  if(!toApply.length&&!toAdd.length&&!toDelete.length){ showToast('Tidak ada perubahan'); return; }
+
+  if(toDelete.length){
+    const konfirmasi = confirm(
+      '⚠️ '+toDelete.length+' produk akan DIHAPUS dari website karena tidak ada di file Excel:\n\n'+
+      toDelete.slice(0,5).map(p=>'• '+p.brand+' '+p.nama).join('\n')+
+      (toDelete.length>5?'\n...dan '+(toDelete.length-5)+' produk lainnya':'')+
+      '\n\nLanjutkan?'
+    );
+    if(!konfirmasi) return;
+  }
+
   for(const r of toApply){
     const idx=products.findIndex(p=>p.id===r.id);
     if(idx===-1) continue;
@@ -1001,12 +1040,17 @@ async function applyExcelChanges(){
     const icon=kat==='laptop'?'💻':kat==='handphone'?'📱':'🎧';
     products.push({id:nextId++,kategori:kat,icon,brand:r.brand,nama:r.nama,spec:r.spec||'',harga:r.newHarga,stok:r.newStok,img:null});
   }
+
+  // Hapus produk yang tidak ada di Excel
+  const deleteIds = new Set(toDelete.map(p=>p.id));
+  products = products.filter(p => !deleteIds.has(p.id));
+
   showToast('⏳ Menyimpan data...');
   await saveProducts();
   render(); renderAdminList();
   cancelExcelPreview();
   switchAdminTab('list',document.getElementById('tabBtnList'));
-  showToast('✅ '+toApply.length+' diupdate + '+toAdd.length+' produk baru!');
+  showToast('✅ '+toApply.length+' diupdate + '+toAdd.length+' baru + '+toDelete.length+' dihapus!');
 }
 function cancelExcelPreview(){
   excelRows=[];
