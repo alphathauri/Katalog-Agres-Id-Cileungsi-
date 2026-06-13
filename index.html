@@ -205,6 +205,20 @@ footer strong{color:var(--text2);}
   .hero-stats{gap:24px;}
   .item-actions{flex-direction:column;}
   .preview-actions{flex-direction:column;}
+  /* ===== MULTI DELETE & SEARCH ADMIN ===== */
+.admin-list-toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;}
+.admin-search-wrap{position:relative;flex:1;min-width:160px;}
+.admin-search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:8px 12px 8px 34px;border-radius:8px;font-size:13px;outline:none;transition:border-color .2s;}
+.admin-search-wrap input:focus{border-color:var(--accent);}
+.admin-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none;}
+.btn-del-selected{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.3);padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:none;align-items:center;gap:6px;}
+.btn-del-selected:hover{background:rgba(239,68,68,0.22);}
+.btn-del-selected.show{display:inline-flex;}
+.btn-sel-all{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:8px 12px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-sel-all:hover{border-color:var(--accent);color:var(--accent);}
+.item-checkbox{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+.product-list-item.selected{border-color:var(--accent);background:rgba(108,99,255,0.08);}
+.admin-count{font-size:12px;color:var(--text3);white-space:nowrap;align-self:center;}
 }
 </style>
 </head>
@@ -653,14 +667,95 @@ function switchAdminTab(tab,el){
   document.getElementById('adminTabExcel').style.display=tab==='excel'?'':'none';
   if(tab==='list') renderAdminList();
 }
+let adminSearchQuery = '';
+let selectedIds = new Set();
+
 function renderAdminList(){
-  const el=document.getElementById('adminProductList');
+  const el = document.getElementById('adminProductList');
   if(!products.length){ el.innerHTML='<div style="text-align:center;color:var(--text3);padding:24px">Belum ada produk.</div>'; return; }
-  el.innerHTML=products.map(p=>{
-    const si=stokInfo(p.stok);
-    const thumb=p.img?'<img src="'+p.img+'" alt="">':''+( p.icon||'📦');
-    return '<div class="product-list-item"><div class="item-thumb">'+thumb+'</div><div class="item-info"><div class="item-name">'+p.brand+' '+p.nama+'</div><div class="item-meta">'+p.kategori+' · '+formatRp(p.harga)+' · <span class="badge-stok '+si.cls+'" style="position:static;padding:2px 7px">'+si.label+' ('+p.stok+')</span></div></div><div class="item-actions"><button class="btn-edit" onclick="editStok('+p.id+')">Stok</button><button class="btn-edit" onclick="editProduk('+p.id+')">Edit</button><button class="btn-danger" style="padding:6px 10px;font-size:12px" onclick="hapusProduk('+p.id+')">✕</button></div></div>';
-  }).join('');
+
+  const q = adminSearchQuery.toLowerCase();
+  const filtered = products.filter(p =>
+    !q ||
+    (p.nama||'').toLowerCase().includes(q) ||
+    (p.brand||'').toLowerCase().includes(q) ||
+    (p.kategori||'').toLowerCase().includes(q)
+  );
+
+  // Bersihkan selectedIds yang tidak ada di filtered
+  const filteredIds = new Set(filtered.map(p=>p.id));
+  selectedIds.forEach(id=>{ if(!filteredIds.has(id)) selectedIds.delete(id); });
+
+  const allChecked = filtered.length > 0 && filtered.every(p => selectedIds.has(p.id));
+
+  el.innerHTML = `
+    <div class="admin-list-toolbar">
+      <div class="admin-search-wrap">
+        <span class="admin-search-icon">🔍</span>
+        <input type="text" placeholder="Cari produk di daftar..." value="${adminSearchQuery}"
+          oninput="adminSearchQuery=this.value;renderAdminList()" id="adminSearchInput">
+      </div>
+      <button class="btn-sel-all" onclick="toggleSelectAll()">${allChecked?'✕ Batal Pilih':'☑ Pilih Semua'}</button>
+      <button class="btn-del-selected ${selectedIds.size?'show':''}" id="btnDelSelected" onclick="hapusSelected()">
+        🗑️ Hapus (${selectedIds.size})
+      </button>
+      <span class="admin-count">${filtered.length} produk</span>
+    </div>
+  ` + (filtered.length === 0
+    ? '<div style="text-align:center;color:var(--text3);padding:24px">Tidak ada produk ditemukan.</div>'
+    : filtered.map(p => {
+        const si = stokInfo(p.stok);
+        const thumb = p.img ? '<img src="'+p.img+'" alt="">' : (p.icon||'📦');
+        const checked = selectedIds.has(p.id) ? 'checked' : '';
+        return `<div class="product-list-item${selectedIds.has(p.id)?' selected':''}" id="item-${p.id}">
+          <input type="checkbox" class="item-checkbox" ${checked} onchange="toggleSelect(${p.id},this.checked)">
+          <div class="item-thumb">${thumb}</div>
+          <div class="item-info">
+            <div class="item-name">${p.brand} ${p.nama}</div>
+            <div class="item-meta">${p.kategori} · ${formatRp(p.harga)} · <span class="badge-stok ${si.cls}" style="position:static;padding:2px 7px">${si.label} (${p.stok})</span></div>
+          </div>
+          <div class="item-actions">
+            <button class="btn-edit" onclick="editStok(${p.id})">Stok</button>
+            <button class="btn-edit" onclick="editProduk(${p.id})">Edit</button>
+            <button class="btn-danger" style="padding:6px 10px;font-size:12px" onclick="hapusProduk(${p.id})">✕</button>
+          </div>
+        </div>`;
+      }).join('')
+  );
+}
+
+function toggleSelect(id, checked){
+  if(checked) selectedIds.add(id); else selectedIds.delete(id);
+  const item = document.getElementById('item-'+id);
+  if(item) item.classList.toggle('selected', checked);
+  // Update toolbar saja tanpa re-render penuh
+  const btn = document.getElementById('btnDelSelected');
+  if(btn){ btn.className='btn-del-selected'+(selectedIds.size?' show':''); btn.textContent='🗑️ Hapus ('+selectedIds.size+')'; }
+}
+
+function toggleSelectAll(){
+  const q = adminSearchQuery.toLowerCase();
+  const filtered = products.filter(p =>
+    !q || (p.nama||'').toLowerCase().includes(q) ||
+    (p.brand||'').toLowerCase().includes(q) ||
+    (p.kategori||'').toLowerCase().includes(q)
+  );
+  const allChecked = filtered.every(p => selectedIds.has(p.id));
+  if(allChecked){ filtered.forEach(p=>selectedIds.delete(p.id)); }
+  else { filtered.forEach(p=>selectedIds.add(p.id)); }
+  renderAdminList();
+}
+
+async function hapusSelected(){
+  if(!selectedIds.size) return;
+  const toHapus = products.filter(p=>selectedIds.has(p.id));
+  if(!confirm(`Hapus ${toHapus.length} produk yang dipilih?\n\n`+toHapus.slice(0,5).map(p=>'• '+p.brand+' '+p.nama).join('\n')+(toHapus.length>5?'\n...dan '+(toHapus.length-5)+' lainnya':''))) return;
+  products = products.filter(p=>!selectedIds.has(p.id));
+  selectedIds.clear();
+  showToast('⏳ Menyimpan...');
+  await saveProducts();
+  render(); renderAdminList();
+  showToast('✅ '+toHapus.length+' produk berhasil dihapus!');
 }
 async function handleImageUpload(e){
   const file=e.target.files[0]; if(!file) return;
