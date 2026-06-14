@@ -220,6 +220,106 @@ footer strong{color:var(--text2);}
 .product-list-item.selected{border-color:var(--accent);background:rgba(108,99,255,0.08);}
 .admin-count{font-size:12px;color:var(--text3);white-space:nowrap;align-self:center;}
 }
+
+/* ===== EXPAND CARDS (kategori) ===== */
+.expand-section{max-width:1200px;margin:0 auto;padding:40px 24px 0;}
+.expand-cards{display:flex;gap:12px;height:340px;overflow:hidden;}
+.expand-card{
+  position:relative;
+  border-radius:18px;
+  overflow:hidden;
+  cursor:pointer;
+  flex:1;
+  min-width:72px;
+  transition:flex 0.55s cubic-bezier(0.4,0,0.2,1);
+  border:1px solid rgba(255,255,255,0.08);
+}
+.expand-cards:hover .expand-card{flex:0.4;}
+.expand-cards .expand-card:hover{flex:4 !important;}
+.expand-card-bg{
+  position:absolute;inset:0;
+  background-size:cover;background-position:center;
+  transition:transform 0.55s cubic-bezier(0.4,0,0.2,1);
+}
+.expand-card:hover .expand-card-bg{transform:scale(1.05);}
+.expand-card-overlay{
+  position:absolute;inset:0;
+  transition:background 0.4s;
+}
+.expand-card:not(:hover) .expand-card-overlay{
+  background:rgba(10,10,15,0.55);
+}
+.expand-card:hover .expand-card-overlay{
+  background:linear-gradient(to top,rgba(10,10,15,0.85) 0%,rgba(10,10,15,0.2) 60%,transparent 100%);
+}
+/* Nomor */
+.expand-num{
+  position:absolute;bottom:20px;right:16px;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:64px;font-weight:800;
+  color:rgba(255,255,255,0.08);
+  line-height:1;
+  transition:opacity 0.3s;
+  pointer-events:none;
+}
+.expand-card:hover .expand-num{opacity:0;}
+/* Label vertikal (collapsed) */
+.expand-label-vertical{
+  position:absolute;
+  bottom:24px;left:50%;
+  transform:translateX(-50%) rotate(180deg);
+  writing-mode:vertical-rl;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:14px;font-weight:700;letter-spacing:0.08em;
+  color:#fff;white-space:nowrap;
+  opacity:1;
+  transition:opacity 0.25s;
+  pointer-events:none;
+  text-transform:uppercase;
+}
+.expand-card:hover .expand-label-vertical{opacity:0;}
+/* Konten expanded */
+.expand-content{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:24px;
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity 0.3s 0.15s, transform 0.3s 0.15s;
+  pointer-events:none;
+}
+.expand-card:hover .expand-content{
+  opacity:1;transform:translateY(0);
+}
+.expand-content-badge{
+  display:inline-block;
+  font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;
+  padding:4px 12px;border-radius:100px;margin-bottom:10px;
+}
+.expand-content-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:22px;font-weight:700;color:#fff;
+  margin-bottom:6px;line-height:1.2;
+}
+.expand-content-desc{
+  font-size:13px;color:rgba(255,255,255,0.65);
+  line-height:1.5;margin-bottom:16px;
+}
+.expand-content-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 18px;border-radius:8px;
+  font-size:13px;font-weight:700;cursor:pointer;
+  border:none;text-decoration:none;
+  background:#fff;color:#0a0a0f;
+  transition:background 0.2s,transform 0.1s;
+}
+.expand-content-btn:hover{background:#e0e0f0;}
+@media(max-width:600px){
+  .expand-cards{height:220px;gap:8px;}
+  .expand-card{min-width:52px;border-radius:12px;}
+  .expand-content-title{font-size:16px;}
+  .expand-content-desc{display:none;}
+  .expand-num{font-size:40px;}
+}
 </style>
 </head>
 <body>
@@ -256,6 +356,69 @@ footer strong{color:var(--text2);}
   </div>
   <div class="hero-dots" id="heroDots"></div>
 </section>
+
+<!-- EXPAND CARDS KATEGORI -->
+<div class="expand-section">
+  <div class="expand-cards">
+
+    <!-- Card 1: Laptop -->
+    <div class="expand-card" onclick="filterKategori('laptop',document.querySelector('.tab:nth-child(2)'));document.querySelector('.main').scrollIntoView({behavior:'smooth'})">
+      <div class="expand-card-bg" style="background-image:url('https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&q=80');"></div>
+      <div class="expand-card-overlay"></div>
+      <div class="expand-num">01</div>
+      <div class="expand-label-vertical">💻 Laptop</div>
+      <div class="expand-content">
+        <span class="expand-content-badge" style="background:rgba(108,99,255,0.25);color:#a78bfa;">Kategori</span>
+        <div class="expand-content-title">Laptop</div>
+        <div class="expand-content-desc">Gaming, kerja, pelajar — semua brand terpercaya dengan harga terbaik.</div>
+        <span class="expand-content-btn">Lihat Produk →</span>
+      </div>
+    </div>
+
+    <!-- Card 2: Handphone -->
+    <div class="expand-card" onclick="filterKategori('handphone',document.querySelector('.tab:nth-child(3)'));document.querySelector('.main').scrollIntoView({behavior:'smooth'})">
+      <div class="expand-card-bg" style="background-image:url('https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80');"></div>
+      <div class="expand-card-overlay"></div>
+      <div class="expand-num">02</div>
+      <div class="expand-label-vertical">📱 Handphone</div>
+      <div class="expand-content">
+        <span class="expand-content-badge" style="background:rgba(14,165,233,0.25);color:#7dd3f8;">Kategori</span>
+        <div class="expand-content-title">Handphone</div>
+        <div class="expand-content-desc">Flagship hingga mid-range pilihan. Garansi resmi distributor.</div>
+        <span class="expand-content-btn">Lihat Produk →</span>
+      </div>
+    </div>
+
+    <!-- Card 3: Aksesoris -->
+    <div class="expand-card" onclick="filterKategori('aksesoris',document.querySelector('.tab:nth-child(4)'));document.querySelector('.main').scrollIntoView({behavior:'smooth'})">
+      <div class="expand-card-bg" style="background-image:url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80');"></div>
+      <div class="expand-card-overlay"></div>
+      <div class="expand-num">03</div>
+      <div class="expand-label-vertical">🎧 Aksesoris</div>
+      <div class="expand-content">
+        <span class="expand-content-badge" style="background:rgba(16,185,129,0.25);color:#6ee7b7;">Kategori</span>
+        <div class="expand-content-title">Aksesoris</div>
+        <div class="expand-content-desc">Headphone, charger, case, dan ratusan aksesoris pilihan berkualitas.</div>
+        <span class="expand-content-btn">Lihat Produk →</span>
+      </div>
+    </div>
+
+    <!-- Card 4: Promo -->
+    <div class="expand-card" onclick="filterKategori('semua',document.querySelector('.tab:nth-child(1)'));document.querySelector('.main').scrollIntoView({behavior:'smooth'})">
+      <div class="expand-card-bg" style="background-image:url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80');"></div>
+      <div class="expand-card-overlay"></div>
+      <div class="expand-num">04</div>
+      <div class="expand-label-vertical">🔥 Semua</div>
+      <div class="expand-content">
+        <span class="expand-content-badge" style="background:rgba(245,158,11,0.25);color:#fcd34d;">Pilihan</span>
+        <div class="expand-content-title">Semua Produk</div>
+        <div class="expand-content-desc">Lihat seluruh koleksi lengkap Agres ID Cileungsi.</div>
+        <span class="expand-content-btn">Lihat Semua →</span>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <div class="filter-bar">
   <button class="tab active" onclick="filterKategori('semua',this)">Semua</button>
